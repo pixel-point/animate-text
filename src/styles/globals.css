@@ -1,0 +1,309 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@plugin '../../tailwind.plugins.mjs';
+
+@import 'tw-animate-css';
+
+@import './typography.css';
+@import './shiki.css';
+@import './video.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 3% 12%;
+  --card: 0 0% 95%;
+  --card-foreground: 240 3% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 214 65% 15%;
+  --primary: 211 97% 45%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 3% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --link: 210 100% 40%;
+  --muted: 210 12% 94%;
+  --muted-foreground: 240 2% 44%;
+  --accent: 210 27% 96%;
+  --accent-foreground: 214 65% 15%;
+  --destructive: 357 100% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 89%;
+  --input: 0 0% 89%;
+  --ring: 211 81% 51%;
+  --chart-1: 240 100% 24%;
+  --chart-2: 223 100% 31%;
+  --chart-3: 211 100% 44%;
+  --chart-4: 210 100% 68%;
+  --chart-5: 207 100% 79%;
+  --radius: 0.375rem;
+  --button-radius-xs: 0.125rem;
+  --button-radius-sm: 0.25rem;
+  --button-radius-md: 0.375rem;
+  --button-radius-lg: 0.5rem;
+  --font-body-family: Inter;
+  --font-heading-family: var(--font-body-family);
+  --font-heading: var(--font-heading-family);
+  --tracking-offset-body: 0em;
+  --tracking-offset-heading: 0em;
+
+  --number-flow-mask-height: 0.25rem;
+  --number-flow-mask-width: 0.25rem;
+
+  --sticky-header-height: 3.3125rem;
+  --footer-safe-area-spacing: 0rem;
+  --sidebar: 210 40% 98%;
+  --sidebar-foreground: 214 65% 15%;
+  --sidebar-primary: 211 97% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 210 27% 96%;
+  --sidebar-accent-foreground: 214 65% 15%;
+  --sidebar-border: 213 23% 91%;
+  --sidebar-ring: 213 23% 91%;
+}
+
+.dark {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 97%;
+  --card: 240 3% 12%;
+  --card-foreground: 0 0% 97%;
+  --popover: 240 3% 12%;
+  --popover-foreground: 0 0% 97%;
+  --primary: 211 97% 45%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 240 3% 12%;
+  --link: 211 97% 45%;
+  --muted: 240 3% 12%;
+  --muted-foreground: 0 0% 53%;
+  --accent: 215 12% 27%;
+  --accent-foreground: 0 0% 97%;
+  --destructive: 0 100% 68%;
+  --destructive-foreground: 0 0% 0%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 213 100% 59%;
+  --chart-1: 223 100% 31%;
+  --chart-2: 211 100% 44%;
+  --chart-3: 210 100% 68%;
+  --chart-4: 198 100% 80%;
+  --chart-5: 180 100% 90%;
+  --radius: 0.375rem;
+  --button-radius-xs: 0.125rem;
+  --button-radius-sm: 0.25rem;
+  --button-radius-md: 0.375rem;
+  --button-radius-lg: 0.5rem;
+  --tracking-offset-body: 0em;
+  --tracking-offset-heading: 0em;
+  --sidebar: 216 45% 2%;
+  --sidebar-foreground: 0 0% 97%;
+  --sidebar-primary: 0 0% 100%;
+  --sidebar-primary-foreground: 216 22% 9%;
+  --sidebar-accent: 213 17% 13%;
+  --sidebar-accent-foreground: 0 0% 97%;
+  --sidebar-border: 218 13% 17%;
+  --sidebar-ring: 213 100% 59%;
+}
+
+@theme inline {
+  --breakpoint-3xl: 120rem;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-link: hsl(var(--link));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-sm: max(calc(var(--radius) - 4px), 0.25rem);
+  --radius-md: max(calc(var(--radius) - 2px), 0.25rem);
+  --radius-lg: max(var(--radius), 0.25rem);
+  --radius-xl: max(calc(var(--radius) + 4px), 0.25rem);
+  --radius-2xl: max(calc(var(--radius) + 8px), 0.25rem);
+
+  --font-sans:
+    var(--font-body-family), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-heading:
+    var(--font-heading-family), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --tracking-tighter: calc(
+    -0.05em +
+      var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+  --tracking-tight: calc(
+    -0.025em +
+      var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+  --tracking-normal: calc(
+    0em + var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+  --tracking-wide: calc(
+    0.025em +
+      var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+  --tracking-wider: calc(
+    0.05em +
+      var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+  --tracking-widest: calc(
+    0.1em + var(--tracking-offset-context, var(--tracking-offset-body, var(--tracking-offset, 0em)))
+  );
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-logos: logos 60s linear infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes logos {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility border-gradient {
+  @apply border border-transparent bg-origin-border;
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0) border-box;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@utility border-grid {
+  @apply border-border/30 dark:border-border;
+}
+
+@utility remove-autocomplete-styles {
+  &:-webkit-autofill,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:hover {
+    -webkit-transition:
+      background-color 5000s,
+      color 5000s;
+    transition:
+      background-color 5000s,
+      color 5000s;
+  }
+}
+
+@utility leading-tighter {
+  line-height: 1.125;
+}
+
+@layer utilities {
+  body,
+  .font-sans {
+    font-family: var(--font-sans);
+    --tracking-offset-context: var(--tracking-offset-body, var(--tracking-offset, 0em));
+  }
+
+  .b-rounded-md {
+    border-radius: var(--button-radius-md);
+  }
+
+  .b-rounded-xs {
+    border-radius: var(--button-radius-xs);
+  }
+
+  .b-rounded-sm {
+    border-radius: var(--button-radius-sm);
+  }
+
+  .b-rounded-lg {
+    border-radius: var(--button-radius-lg);
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+    --tracking-offset-context: var(--tracking-offset-heading, var(--tracking-offset, 0em));
+  }
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  body:has([data-slot='documentation-menu-trigger']) {
+    --footer-safe-area-spacing: 3.25rem;
+  }
+
+  :where(:focus-visible) {
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-hidden;
+  }
+
+  a:not([class]) {
+    @apply rounded focus-visible:ring-offset-0;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,53 @@
+html .shiki {
+  --shiki-highlighted-line-background: hsla(0, 0%, 96%, 0.8);
+  --shiki-removed-line-background: hsla(1, 66%, 87%, 0.9);
+  --shiki-added-line-background: hsla(122, 19%, 71%, 0.9);
+  @apply !bg-transparent;
+}
+
+html.dark .shiki {
+  --shiki-highlighted-line-background: hsla(240, 4%, 15%, 0.8);
+  --shiki-removed-line-background: hsla(1, 41%, 20%, 0.9);
+  --shiki-added-line-background: hsla(124, 24%, 23%, 0.9);
+}
+
+html .shiki span {
+  color: var(--shiki-light);
+}
+
+html.dark .shiki {
+  & span {
+    color: var(--shiki-dark) !important;
+  }
+}
+
+pre code {
+  @apply !flex flex-col text-sm;
+}
+
+code .line::after {
+  @apply invisible overflow-hidden content-["'"];
+}
+
+.show-linenumbers {
+  pre code {
+    counter-reset: line;
+  }
+
+  pre code > .line::before {
+    counter-increment: line;
+    content: counter(line);
+
+    @apply mr-5 inline-block w-4 text-right text-sm text-muted-foreground;
+  }
+}
+
+.shiki span.line.highlighted {
+  @apply !bg-[var(--shiki-highlighted-line-background)];
+}
+.shiki span.line.diff.add {
+  @apply !bg-[var(--shiki-added-line-background)] before:ml-2 before:text-foreground/90 before:content-["+"];
+}
+.shiki span.line.diff.remove {
+  @apply !bg-[var(--shiki-removed-line-background)] before:ml-2 before:text-foreground/90 before:content-["-"];
+}

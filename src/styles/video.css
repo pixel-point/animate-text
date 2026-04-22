@@ -1,0 +1,22 @@
+media-controller {
+  --media-font-size: 13px;
+  --media-font-weight: 500;
+  --media-font-family: var(--font-body-family), sans-serif;
+  --media-text-content-height: 1.375;
+  --media-primary-color: var(--foreground);
+  --media-secondary-color: hsla(var(--foreground) / 0.85);
+  --media-control-background: transparent;
+  --media-control-hover-background: transparent;
+  --media-icon-color: transparent;
+  --media-text-color: hsl(var(--foreground));
+  --media-range-background: hsl(var(--foreground));
+  --media-range-track-background: hsl(var(--foreground) / 0.1);
+  --media-time-range-buffered-color: hsl(var(--foreground) / 0.1);
+  --media-range-track-height: 0.375rem;
+  --media-range-thumb-background: hsl(var(--foreground));
+  --media-range-track-border-radius: 3px;
+  --media-range-bar-color: hsl(var(--foreground));
+  --media-preview-background: hsl(var(--background));
+  --media-range-padding-left: 0px;
+  --media-range-padding-right: 0px;
+}

@@ -1,0 +1,53 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# ignore local sitemap
+public/sitemap.xml
+public/sitemap-0.xml
+public/robots.txt
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+build.log
+prodserver.log
+devserver.log
+
+# eslint
+.eslintcache
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# primeui
+.primeui
+.primeui/temp
+.primeui/project.json
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+node_modules/

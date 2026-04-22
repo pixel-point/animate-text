@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "nextjs"],
+  "ignorePatterns": [
+    ".next/**",
+    "dist/**",
+    "build/**",
+    "node_modules/**",
+    ".primeui/**",
+    ".turbo/**",
+    ".cache/**",
+    "*.tsbuildinfo",
+    "next-env.d.ts",
+    "next-sitemap.config.cjs"
+  ],
+  "rules": {
+    "no-console": ["warn", { "allow": ["error", "warn", "info"] }],
+    "eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-explicit-any": "warn",
+    "nextjs/no-img-element": "warn",
+    "nextjs/no-html-link-for-pages": "off"
+  }
+}
