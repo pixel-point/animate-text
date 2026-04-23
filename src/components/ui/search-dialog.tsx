@@ -1,8 +1,8 @@
 'use client';
 
 import { KeyboardEvent, useCallback, useEffect, useState } from 'react';
+import { BookOpenIcon, FileTextIcon } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
-import { BookOpen, FileText } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import useDebounce from '@/hooks/use-debounce';
@@ -106,7 +106,7 @@ function SearchHint({
   onMouseEnter,
 }: SearchHintProps) {
   const isFirst = dataIndex === 0;
-  const IconComp = icon === 'book-open' ? BookOpen : FileText;
+  const IconComp = icon === 'book-open' ? BookOpenIcon : FileTextIcon;
 
   return (
     <Link

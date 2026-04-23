@@ -1,11 +1,8 @@
 import Script from 'next/script';
 import type { Viewport } from 'next';
 import config from '@/configs/website-config';
-import { MENUS } from '@/constants/menus';
 import { Providers } from '@/contexts';
 import { fontVariablesClassName, fontVariablesStyle } from '@/lib/theme-fonts';
-import Footer from '@/components/footer';
-import Header from '@/components/header';
 
 export const viewport: Viewport = {
   themeColor: config.metaThemeColors.light,
@@ -36,12 +33,10 @@ export default async function RootLayout({
       >
         <Providers>
           <div
-            className="flex grow flex-col rounded-none bg-background aria-hidden:[-webkit-mask-image:-webkit-radial-gradient(white,black)]"
+            className="flex min-h-0 grow flex-col rounded-none bg-background aria-hidden:[-webkit-mask-image:-webkit-radial-gradient(white,black)]"
             vaul-drawer-wrapper=""
           >
-            <Header menuItems={MENUS.header} />
-            <div className="grow">{children}</div>
-            <Footer menuItems={MENUS.footer.main} socialItems={MENUS.footer.social} />
+            <div className="min-h-0 grow">{children}</div>
           </div>
         </Providers>
       </body>

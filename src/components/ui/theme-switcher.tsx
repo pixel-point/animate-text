@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MoonIcon, SunIcon } from '@phosphor-icons/react/ssr';
 import { cva } from 'class-variance-authority';
-import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
@@ -13,12 +13,12 @@ interface IThemeSwitcherProps {
 }
 
 const themeSwitcherVariants = cva(
-  'flex w-fit items-center gap-x-0.5 rounded-full border border-input bg-transparent text-muted-foreground',
+  'inline-flex items-center justify-center rounded-full border border-border bg-transparent text-muted-foreground transition-colors duration-300 hover:text-foreground/80 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:outline-hidden',
   {
     variants: {
       size: {
-        default: 'h-7',
-        md: 'h-8',
+        default: 'size-8',
+        md: 'size-9',
       },
     },
     defaultVariants: {
@@ -28,57 +28,30 @@ const themeSwitcherVariants = cva(
 );
 
 export function ThemeSwitcher({ className, size = 'default' }: IThemeSwitcherProps) {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const isDark = mounted && resolvedTheme === 'dark';
+  const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+
   return (
-    <div className={cn(themeSwitcherVariants({ size }), className)}>
-      <button
-        onClick={() => setTheme('system')}
-        className={cn(
-          'flex items-center justify-center rounded-full border border-l-0 border-transparent transition-colors duration-300 hover:text-foreground/80 focus-visible:ring-offset-0',
-          {
-            'size-7': size === 'default',
-            'size-8': size === 'md',
-          },
-          mounted && theme === 'system' && 'border-input text-foreground',
-        )}
-      >
-        <Monitor className="shrink-0" size={14} />
-        <span className="sr-only">System theme</span>
-      </button>
-      <button
-        onClick={() => setTheme('light')}
-        className={cn(
-          'flex items-center justify-center rounded-full border border-transparent transition-colors duration-300 hover:text-foreground/80 focus-visible:ring-offset-0',
-          {
-            'size-7': size === 'default',
-            'size-8': size === 'md',
-          },
-          mounted && theme === 'light' && 'border-input text-foreground',
-        )}
-      >
-        <Sun className="shrink-0" size={14} />
-        <span className="sr-only">Light theme</span>
-      </button>
-      <button
-        onClick={() => setTheme('dark')}
-        className={cn(
-          'flex items-center justify-center rounded-full border border-r-0 border-transparent transition-colors duration-300 hover:text-foreground/80 focus-visible:ring-offset-0',
-          {
-            'size-7': size === 'default',
-            'size-8': size === 'md',
-          },
-          mounted && theme === 'dark' && 'border-input bg-background text-foreground',
-        )}
-      >
-        <Moon className="shrink-0" size={14} />
-        <span className="sr-only">Dark theme</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className={cn(themeSwitcherVariants({ size }), className)}
+      aria-label={label}
+      title={label}
+    >
+      {isDark ? (
+        <SunIcon className="shrink-0" size={16} />
+      ) : (
+        <MoonIcon className="shrink-0" size={16} />
+      )}
+      <span className="sr-only">{label}</span>
+    </button>
   );
 }

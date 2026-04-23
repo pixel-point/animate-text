@@ -8,7 +8,7 @@ export const alt = 'Social preview';
 export const size = SOCIAL_IMAGE_SIZE;
 export const contentType = SOCIAL_IMAGE_CONTENT_TYPE;
 
-const SOCIAL_IMAGE_TITLE = 'Home';
+const SOCIAL_IMAGE_TITLE = 'Animate text skill for your AI agent.';
 
 export default async function SocialImage() {
   return createSocialImageResponse({

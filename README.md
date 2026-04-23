@@ -33,11 +33,14 @@ cp .env.example .env
 ## Development Workflow
 
 1. Start the dev server with `pnpm dev`.
-2. Add or update routes in `src/app`.
-3. Build reusable UI in `src/components/ui`.
-4. Build page-specific sections in `src/components/pages/<slug>`
-5. Compose pages from those sections inside route files under `src/app`.
-6. Run quality checks before committing:
+2. Regenerate the skill and app data when changing the animation catalog:
+   - `pnpm generate:animate-text-skill`
+   - `pnpm validate:animate-text-catalog`
+3. Add or update routes in `src/app`.
+4. Build reusable UI in `src/components/ui`.
+5. Build page-specific sections in `src/components/pages/<slug>`
+6. Compose pages from those sections inside route files under `src/app`.
+7. Run quality checks before committing:
    - `pnpm lint`
    - `pnpm format`
    - `pnpm typecheck` (`tsgo --noEmit`)
@@ -46,6 +49,9 @@ cp .env.example .env
 ## Available Scripts
 
 - `pnpm dev` - start Next.js in development mode
+- `pnpm generate:animate-text-skill` - rebuild the installable skill and generated site data from `catalog/text-animations`
+- `pnpm validate:animate-text-catalog` - validate canonical catalog inputs and ensure generated outputs are up to date
+- `pnpm test:animate-text-skill` - smoke test the generated public skill helper scripts
 - `pnpm build` - create a production build
 - `pnpm start` - run the production server
 - `pnpm lint` - run OXC lint checks
@@ -59,6 +65,9 @@ cp .env.example .env
 ```text
 .
 ├─ public/                    # static assets served as-is
+├─ catalog/                   # canonical source-of-truth data for the text animation library
+├─ skills/                    # installable generated skill output
+├─ templates/                 # templates used to generate skill documents
 ├─ src/
 │  ├─ app/                    # Next.js App Router (routes, layouts, not-found)
 │  ├─ components/
@@ -74,6 +83,7 @@ cp .env.example .env
 │  ├─ lib/                    # utilities and framework helpers
 │  ├─ styles/                 # global and feature styles
 │  └─ types/                  # shared TypeScript types
+├─ scripts/                   # repo-maintainer scripts including catalog generation/validation
 ├─ next.config.ts             # Next.js configuration
 ├─ postcss.config.mjs         # PostCSS configuration
 ├─ tailwind.plugins.mjs       # Tailwind plugin setup
@@ -134,3 +144,30 @@ For the `/docs` section, this project follows the same page conventions as FumaD
 - Run `pnpm start` to serve the compiled build.
 - `postbuild` can generate sitemap files and `robots.txt` via `next-sitemap`.
 - Generated/runtime directories such as `.next/`, `.turbo/`, and `node_modules/` are not source files.
+
+## Animate Text Skill
+
+This repository now contains two downstream outputs generated from `catalog/text-animations/`:
+
+- `skills/animate-text/` - the installable public skill for the `skills.sh` ecosystem
+- `src/data/text-animations/generated/` - app-facing generated modules used by the website
+
+Canonical editing rules:
+
+- edit `catalog/text-animations/**` by hand
+- do not hand-edit `skills/animate-text/**`
+- do not hand-edit `src/data/text-animations/generated/**`
+
+Typical maintainer flow:
+
+```bash
+pnpm generate:animate-text-skill
+pnpm validate:animate-text-catalog
+pnpm test:animate-text-skill
+```
+
+Install form for consumers:
+
+```bash
+npx skills add <owner>/<repo> --skill animate-text
+```

@@ -6,6 +6,7 @@
 
 @import './typography.css';
 @import './shiki.css';
+@import './text-animations.css';
 @import './video.css';
 
 @custom-variant dark (&:where(.dark, .dark *));

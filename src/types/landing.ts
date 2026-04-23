@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { type Route } from 'next';
 
-import type { IBlockquote, IFaqItem, ILogo, ILucideIcon } from '@/types/common';
+import type { IBlockquote, IFaqItem, IIconElement, ILogo } from '@/types/common';
 import type { TSocialIcons } from '@/components/icons';
 
 export type TSectionAction =
@@ -31,7 +31,7 @@ export interface IHeroSection {
     height: number;
   };
   items?: {
-    lucideIcon: ILucideIcon['lucideIcon'];
+    lucideIcon: IIconElement['lucideIcon'];
     label: string;
   }[];
   slides?: {
@@ -68,7 +68,7 @@ export interface IFeatureCard {
   };
 }
 
-export interface IFeatureItemIcon extends ILucideIcon {
+export interface IFeatureItemIcon extends IIconElement {
   title: string;
   description: string;
 }
@@ -126,7 +126,7 @@ export interface ITableRow {
   description: ReactNode | string;
   linkUrl?: Route<string> | URL;
   linkText?: string;
-  lucideIcon?: ILucideIcon['lucideIcon'];
+  lucideIcon?: IIconElement['lucideIcon'];
   logo?: {
     src: string;
     alt?: string;

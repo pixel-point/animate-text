@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { CaretRightIcon } from '@phosphor-icons/react/ssr';
 
 import { IMenuItem } from '@/types/common';
 import { cn } from '@/lib/utils';
@@ -85,7 +85,7 @@ function RecursiveMenuItemComponent({ item, depth, currentPath }: RecursiveMenuI
                 {item.label}
               </span>
             )}
-            <ChevronRight className="size-4 shrink-0 transition-transform duration-200" />
+            <CaretRightIcon className="size-4 shrink-0 transition-transform duration-200" />
           </CollapsibleTrigger>
           <CollapsibleContent className="overflow-hidden">
             <RecursiveMenu items={childItems} depth={depth + 1} />

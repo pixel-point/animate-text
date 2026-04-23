@@ -1,7 +1,7 @@
 'use client';
 
 import { KeyboardEvent, useState } from 'react';
-import { ChevronDown, ChevronRight, FileText, Folder } from 'lucide-react';
+import { CaretDownIcon, CaretRightIcon, FileTextIcon, FolderIcon } from '@phosphor-icons/react/ssr';
 
 import { cn } from '@/lib/utils';
 
@@ -69,14 +69,14 @@ const FileSystemItem = ({ node, level = 0 }: FileSystemItemProps) => {
         {isFolder && (
           <>
             {isOpen ? (
-              <ChevronDown className="mr-2.5 size-4 shrink-0" aria-hidden="true" />
+              <CaretDownIcon className="mr-2.5 size-4 shrink-0" aria-hidden="true" />
             ) : (
-              <ChevronRight className="mr-2.5 size-4 shrink-0" aria-hidden="true" />
+              <CaretRightIcon className="mr-2.5 size-4 shrink-0" aria-hidden="true" />
             )}
-            <Folder className="size-5 shrink-0" />
+            <FolderIcon className="size-5 shrink-0" />
           </>
         )}
-        {!isEllipsis && !isFolder && <FileText className="size-5 shrink-0" />}
+        {!isEllipsis && !isFolder && <FileTextIcon className="size-5 shrink-0" />}
         <span className="ml-2 font-medium">{node.name}</span>
       </div>
       {isFolder && isOpen && node.children && node.children.length > 0 && (

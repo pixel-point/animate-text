@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react/ssr';
 import { Route } from 'next';
 import { usePathname } from 'next/navigation';
-import { Search } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useTouchDevice } from '@/hooks/use-touch-device';
@@ -67,7 +67,7 @@ function SearchBar({
           size="sm"
           {...props}
         >
-          <Search size={12} />
+          <MagnifyingGlassIcon size={12} />
           <span className="mr-auto ml-0.5 inline-flex text-[0.8125rem] font-normal">
             {placeholder}
           </span>

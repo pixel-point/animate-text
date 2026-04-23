@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { LinkIcon } from '@phosphor-icons/react/ssr';
 import { usePathname } from 'next/navigation';
 import copy from 'copy-to-clipboard';
-import { Link } from 'lucide-react';
 import { AnimatePresence, domAnimation, LazyMotion } from 'motion/react';
 import * as m from 'motion/react-m';
 
@@ -125,7 +125,7 @@ function Heading({
                         exit="exit"
                         className="will-change-transform"
                       >
-                        <Link className="text-muted-foreground" width={16} height={16} />
+                        <LinkIcon className="text-muted-foreground" width={16} height={16} />
                       </m.span>
                     )}
                   </AnimatePresence>

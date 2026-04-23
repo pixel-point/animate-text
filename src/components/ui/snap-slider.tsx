@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react/ssr';
 import { Slot } from '@radix-ui/react-slot';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useTouchDevice } from '@/hooks/use-touch-device';
@@ -276,7 +276,7 @@ const SnapSliderPrevious = ({
       onClick={scrollPrev}
       {...props}
     >
-      <ChevronLeft className="size-5" />
+      <CaretLeftIcon className="size-5" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -314,7 +314,7 @@ const SnapSliderNext = ({
       onClick={scrollNext}
       {...props}
     >
-      <ChevronRight className="size-5" />
+      <CaretRightIcon className="size-5" />
       <span className="sr-only">Next slide</span>
     </Button>
   );

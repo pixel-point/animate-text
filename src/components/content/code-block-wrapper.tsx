@@ -1,7 +1,7 @@
 'use client';
 
 import { isValidElement, ReactElement, ReactNode } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { CheckIcon, CopyIcon } from '@phosphor-icons/react/ssr';
 
 import { cn } from '@/lib/utils';
 import useCopyToClipboard from '@/hooks/use-copy-to-clipboard';
@@ -110,7 +110,7 @@ function CodeBlockWrapper({
           aria-label={cn(isCopied ? 'Copied' : 'Copy')}
           onClick={() => handleCopy(code)}
         >
-          {isCopied ? <Check size={14} /> : <Copy size={14} />}
+          {isCopied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
         </button>
       </div>
     </Tag>

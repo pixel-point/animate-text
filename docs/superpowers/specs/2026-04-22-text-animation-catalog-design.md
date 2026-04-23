@@ -11,7 +11,7 @@ The primary product goal is visual parity with the reference bundle in `tmp/`, n
 
 ## Context
 
-- The current home page in [src/app/(website)/page.tsx](/Users/alex/Projects/animate-text/src/app/(website)/page.tsx) already has the correct macro layout: a fixed left panel and a right-side card grid.
+- The current home page in [src/app/(website)/page.tsx](</Users/alex/Projects/animate-text/src/app/(website)/page.tsx>) already has the correct macro layout: a fixed left panel and a right-side card grid.
 - The reference bundle in `tmp/` contains 24 JSON specs, but the reference catalog in `tmp/index.html` intentionally exposes 20 ready effects.
 - The user wants those animations brought into the app's layout rather than recreating the standalone catalog page.
 - Each animation should live inside its own right-panel rectangle.

@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
+import { XIcon } from '@phosphor-icons/react/ssr';
 import { cva } from 'class-variance-authority';
-import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -75,7 +75,7 @@ function SheetContent({
         {...props}
       >
         <SheetPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
-          <X className="size-4" />
+          <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
         {children}

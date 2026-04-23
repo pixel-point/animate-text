@@ -1,0 +1,6 @@
+{
+  "tileSpeed": 0.72,
+  "tileHoldMs": 550,
+  "tileGapMs": 320,
+  "tileYTravel": 0.58
+}

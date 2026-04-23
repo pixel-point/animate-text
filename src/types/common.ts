@@ -1,9 +1,8 @@
-import { ReactNode, ReactElement } from 'react';
+import { ReactElement, ReactNode, SVGProps } from 'react';
 import { type Route } from 'next';
 import { type BundledLanguage } from 'shiki/langs';
 
 import { type TSocialIcons } from '@/components/icons';
-import type { LucideProps } from 'lucide-react';
 
 export type MenuHref = Route<string> | URL;
 
@@ -209,6 +208,6 @@ export interface ICookieBanner {
   handleCloseCookieSettings: () => void;
 }
 
-export type ILucideIcon = {
-  lucideIcon: ReactElement<LucideProps>;
+export type IIconElement = {
+  lucideIcon: ReactElement<SVGProps<SVGSVGElement>>;
 };

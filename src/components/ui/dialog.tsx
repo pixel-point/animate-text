@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react/ssr';
 
 import { cn } from '@/lib/utils';
 
@@ -77,7 +77,7 @@ function DialogContent({
         {children}
         {!hasCustomClose && (
           <DialogClose className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus-visible:opacity-100 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="size-4" />
+            <XIcon className="size-4" />
             <span className="sr-only">Close</span>
           </DialogClose>
         )}

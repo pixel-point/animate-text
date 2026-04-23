@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import { CheckIcon, CopyIcon } from '@phosphor-icons/react/ssr';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Check, Copy } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import useCopyToClipboard from '@/hooks/use-copy-to-clipboard';
@@ -46,7 +46,11 @@ function CopyCommand({ command, inlineEditPath, size, className, ...props }: Cop
         onClick={() => handleCopy(command)}
         aria-label={isCopied ? 'Copied' : 'Copy to clipboard'}
       >
-        {isCopied ? <Check className="size-5" strokeWidth={2.5} /> : <Copy className="size-5" />}
+        {isCopied ? (
+          <CheckIcon className="size-5" weight="bold" />
+        ) : (
+          <CopyIcon className="size-5" />
+        )}
       </button>
     </div>
   );

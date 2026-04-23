@@ -1,8 +1,8 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
+import { PlayIcon } from '@phosphor-icons/react/ssr';
 import { cva } from 'class-variance-authority';
-import { Play } from 'lucide-react';
 
 import { IYouTubeEmbed } from '@/types/common';
 import { cn } from '@/lib/utils';
@@ -66,7 +66,7 @@ function YouTubeEmbed({
           className="absolute top-4 left-4 flex h-8 items-center justify-center gap-x-2 rounded-full bg-background/90 px-3 text-xs font-semibold tracking-tight shadow-md lg:top-6 lg:left-6 lg:pr-4 lg:pl-3"
           tabIndex={isVideoActive ? -1 : 0}
         >
-          <Play className="shrink-0" size={14} />
+          <PlayIcon className="shrink-0" size={14} />
           <span className="sr-only sm:not-sr-only">Play video</span>
         </div>
       </button>

@@ -1,17 +1,17 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { cva } from 'class-variance-authority';
 import {
-  Maximize,
-  Minimize,
+  CornersInIcon,
+  CornersOutIcon,
   PauseIcon,
   PlayIcon,
-  Volume,
-  Volume1,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
+  SpeakerSimpleHighIcon,
+  SpeakerSimpleLowIcon,
+  SpeakerSimpleNoneIcon,
+  SpeakerSimpleXIcon,
+} from '@phosphor-icons/react/ssr';
+import { cva } from 'class-variance-authority';
 import {
   MediaControlBar,
   MediaController,
@@ -141,25 +141,25 @@ const Video = ({
                           <MediaDurationDisplay className="min-w-12 px-0 tracking-tight outline-hidden" />
                           <MediaMuteButton className="px-1 outline-hidden md:px-2.5">
                             <span slot="low">
-                              <Volume className="size-4 md:size-5" />
+                              <SpeakerSimpleNoneIcon className="size-4 md:size-5" />
                             </span>
                             <span slot="medium">
-                              <Volume1 className="size-4 md:size-5" />
+                              <SpeakerSimpleLowIcon className="size-4 md:size-5" />
                             </span>
                             <span slot="high">
-                              <Volume2 className="size-4 md:size-5" />
+                              <SpeakerSimpleHighIcon className="size-4 md:size-5" />
                             </span>
                             <span slot="off">
-                              <VolumeX className="size-4 md:size-5" />
+                              <SpeakerSimpleXIcon className="size-4 md:size-5" />
                             </span>
                           </MediaMuteButton>
                           <MediaVolumeRange className="hidden max-w-[5.375rem] pr-1.5 outline-hidden sm:block"></MediaVolumeRange>
                           <MediaFullscreenButton className="outline-hidden">
                             <span slot="enter">
-                              <Maximize className="size-4 md:size-5" />
+                              <CornersOutIcon className="size-4 md:size-5" />
                             </span>
                             <span slot="exit">
-                              <Minimize className="size-4 md:size-5" />
+                              <CornersInIcon className="size-4 md:size-5" />
                             </span>
                           </MediaFullscreenButton>
                         </MediaControlBar>

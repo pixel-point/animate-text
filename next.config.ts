@@ -9,7 +9,7 @@ const resolveMdxPlugin = (file: string) => resolveLocalPlugin(`./src/lib/mdx-plu
 
 const nextConfig: NextConfig = {
   experimental: {
-    optimizePackageImports: ['lucide-react', 'date-fns'],
+    optimizePackageImports: ['@phosphor-icons/react', 'date-fns'],
   },
   serverExternalPackages: ['eslint', 'postcss', 'prettier', 'shiki', 'typescript'],
   images: {

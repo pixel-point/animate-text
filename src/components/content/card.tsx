@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { ChevronRightIcon } from 'lucide-react';
+import { CaretRightIcon } from '@phosphor-icons/react/ssr';
 
 import { cn } from '@/lib/utils';
 import { Link } from '@/components/ui/link';
@@ -85,7 +85,7 @@ function Card({
       {hasLink && !asLink && (
         <Link className="group/link mt-auto w-fit leading-none" href={linkUrl} size="sm">
           {linkText}
-          <ChevronRightIcon
+          <CaretRightIcon
             className="-mx-0.5 transition-transform duration-300 group-hover/link:translate-x-0.5"
             size={12}
           />
@@ -94,7 +94,7 @@ function Card({
       {asLink && hasLink && (
         <span className="mt-auto flex w-fit gap-x-1.5 text-sm leading-none font-medium tracking-tight text-primary">
           {linkText}
-          <ChevronRightIcon
+          <CaretRightIcon
             className="-mx-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
             size={12}
           />
