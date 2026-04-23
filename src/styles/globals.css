@@ -182,6 +182,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-logos: logos 60s linear infinite;
+  --animate-icon-swing: icon-swing 0.8s both 0.4s;
 
   @keyframes accordion-down {
     from {
@@ -207,6 +208,20 @@
     }
     100% {
       transform: translateX(-50%);
+    }
+  }
+
+  @keyframes icon-swing {
+    0% {
+      rotate: -4deg;
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* медленное натяжение */
+    }
+    60% {
+      rotate: -20deg;
+      animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); /* резкий выстрел */
+    }
+    100% {
+      rotate: -4deg;
     }
   }
 }

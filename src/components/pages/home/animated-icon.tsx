@@ -3,26 +3,36 @@
 import { useEffect, useState } from 'react';
 
 export function AnimatedIcon({ className }: { className?: string }) {
-  const [playCount, setPlayCount] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [swingKey, setSwingKey] = useState(0);
 
   useEffect(() => {
     // Add a slight delay for initial load animation
     const timer = setTimeout(() => {
-      setPlayCount(1);
-    }, 1000);
+      setIsPlaying(true);
+    }, 900);
     return () => clearTimeout(timer);
   }, []);
 
   const handlePlay = () => {
-    setPlayCount((c) => c + 1);
+    // Prevent multiple clicks while animating
+    if (!isPlaying) return;
+    
+    setIsPlaying(false);
+    setSwingKey((k) => k + 1);
+    
+    setTimeout(() => {
+      setIsPlaying(true);
+    }, 900);
   };
 
   return (
     <svg
+      key={swingKey}
       viewBox="0 0 162 183"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      className={`${className || ''} animate-icon-swing`}
       onClick={handlePlay}
       style={{ cursor: 'pointer' }}
     >
@@ -115,10 +125,10 @@ export function AnimatedIcon({ className }: { className?: string }) {
       />
 
       {/* The animated circles group */}
-      <g style={{ transform: playCount > 0 ? 'none' : 'translate(42px, 83px)' }}>
-        {playCount > 0 && (
+      <g style={{ transform: isPlaying ? 'none' : 'translate(42px, 83px)' }}>
+        {isPlaying && (
           <animateMotion
-            key={playCount}
+            key="animation"
             ref={(el) => {
               if (el) {
                 try {
