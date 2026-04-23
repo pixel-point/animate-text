@@ -20,6 +20,8 @@ const copyCommandVariants = cva(
   },
 );
 
+type CopyCommandIconWeight = React.ComponentProps<typeof CopyIcon>['weight'];
+
 export interface CopyCommandProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof copyCommandVariants> {
   command: string;
@@ -31,6 +33,8 @@ export interface CopyCommandProps
   contentClassName?: string;
   copyButtonClassName?: string;
   copyAriaLabel?: string;
+  copyIconClassName?: string;
+  copyIconWeight?: CopyCommandIconWeight;
 }
 
 function CopyCommand({
@@ -45,6 +49,8 @@ function CopyCommand({
   contentClassName,
   copyButtonClassName,
   copyAriaLabel,
+  copyIconClassName,
+  copyIconWeight,
   ...props
 }: CopyCommandProps) {
   const { isCopied, handleCopy } = useCopyToClipboard(2000);
@@ -54,27 +60,30 @@ function CopyCommand({
       <div className={cn('relative min-w-0 flex-1 overflow-hidden', contentClassName)}>
         <code
           className={cn(
-            'flex min-w-0 items-center text-sm leading-snug tracking-tight text-muted-foreground',
+            'flex min-w-0 items-center overflow-hidden text-sm leading-snug tracking-tight text-muted-foreground',
             inlineEditPath && 'min-w-0',
           )}
         >
-          {prefix ? <span className="shrink-0 text-muted-foreground">{prefix}</span> : null}
+          {prefix ? (
+            <span className="relative top-px shrink-0 text-[calc(1em+2px)] text-muted-foreground">
+              {prefix}
+            </span>
+          ) : null}
           <span
-            className={cn('min-w-0 truncate', prefix && 'ml-[1ch]', commandClassName)}
+            className={cn(
+              'min-w-0 overflow-hidden whitespace-nowrap',
+              !showFade && 'truncate',
+              showFade &&
+                '[mask-image:linear-gradient(to_right,black_0,black_calc(100%-3rem),transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0,black_calc(100%-3rem),transparent_100%)]',
+              prefix && 'ml-[1ch]',
+              commandClassName,
+              fadeClassName,
+            )}
             title={command}
           >
             {command}
           </span>
         </code>
-        {showFade ? (
-          <span
-            aria-hidden="true"
-            className={cn(
-              'pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-r from-transparent via-background to-background',
-              fadeClassName,
-            )}
-          />
-        ) : null}
       </div>
       <button
         className={cn(
@@ -86,9 +95,12 @@ function CopyCommand({
         aria-label={isCopied ? 'Copied' : (copyAriaLabel ?? 'Copy to clipboard')}
       >
         {isCopied ? (
-          <CheckIcon className="size-5" weight="bold" />
+          <CheckIcon
+            className={cn('size-5', copyIconClassName)}
+            weight={copyIconWeight ?? 'bold'}
+          />
         ) : (
-          <CopyIcon className="size-5" />
+          <CopyIcon className={cn('size-5', copyIconClassName)} weight={copyIconWeight} />
         )}
       </button>
     </div>

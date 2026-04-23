@@ -30,7 +30,7 @@ export default function HomePage() {
     <main className="min-h-svh bg-background md:h-svh md:overflow-hidden">
       <div className="grid min-h-svh md:h-svh md:grid-cols-[480px_minmax(0,1fr)]">
         <aside className="border-b border-border md:sticky md:top-0 md:h-svh md:overflow-hidden md:border-r md:border-b-0 md:dark:[border-right-color:hsl(var(--border)/0.6)]">
-          <div className="flex h-full flex-col justify-between px-5 pt-6 pb-4 md:px-8 lg:px-10 lg:pt-8 lg:pb-6">
+          <div className="flex h-full flex-col justify-between px-5 pt-6 pb-4 md:px-9 lg:px-9 lg:pt-8 lg:pb-6">
             <div>
               <Badge className={`${geistMono.className} mb-5 w-fit gap-[6px] font-normal lg:mb-8`}>
                 <CodexSkillIcon className="size-[18px] shrink-0" />
