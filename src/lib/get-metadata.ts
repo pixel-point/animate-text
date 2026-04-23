@@ -1,7 +1,8 @@
 import { Metadata as NextMetadata } from 'next';
 import config from '@/configs/website-config';
 
-const DEFAULT_SOCIAL_IMAGE = '/opengraph-image';
+const DEFAULT_SITE_URL = 'https://pixelpoint.io';
+const DEFAULT_SOCIAL_IMAGE = '/og.jpg';
 
 /**
  * Metadata configuration options for page SEO
@@ -43,7 +44,7 @@ export function getMetadata({
   type = 'website',
   noIndex = false,
 }: Metadata) {
-  const SITE_URL = process.env.NEXT_PUBLIC_DEFAULT_SITE_URL;
+  const SITE_URL = process.env.NEXT_PUBLIC_DEFAULT_SITE_URL ?? DEFAULT_SITE_URL;
   const canonicalUrl = SITE_URL + pathname;
   const imageUrl = imagePath.startsWith('http') ? imagePath : SITE_URL + imagePath;
 
