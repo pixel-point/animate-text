@@ -14,7 +14,7 @@ function scoreSpec(spec, query, terms) {
   const inspiration = spec.inspiration.toLowerCase();
   const usageNotes = spec.usage_notes.toLowerCase();
   const target = spec.target.toLowerCase();
-  const renderer = (spec.custom_renderer ?? '').toLowerCase();
+  const renderer = (spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? '').toLowerCase();
 
   if (id === query) score += 120;
   if (displayName === query) score += 100;
@@ -53,12 +53,9 @@ const results = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
   .map((fileName) => readJson(new URL(`../assets/specs/${fileName}`, import.meta.url)))
   .map((spec) => {
-    const customRenderer = spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null;
-    const enriched = customRenderer ? { ...spec, custom_renderer: customRenderer } : spec;
-
     return {
-      spec: enriched,
-      score: scoreSpec(enriched, query, terms),
+      spec,
+      score: scoreSpec(spec, query, terms),
     };
   })
   .filter((entry) => entry.score > 0)
@@ -90,8 +87,8 @@ const results = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    custom_renderer: spec.custom_renderer ?? null,
-    visible: visibleOrder.has(spec.id),
+    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? null,
+    visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
     score,
   }));
 

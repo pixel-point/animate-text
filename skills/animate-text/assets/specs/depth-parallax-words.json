@@ -45,5 +45,7 @@
     "micro_delay_ms": 30
   },
   "usage_notes": "Use short copy blocks and moderate stagger to avoid visual overload.",
-  "preview": "./previews/depth-parallax-words.html"
+  "preview": "./previews/depth-parallax-words.html",
+  "visibility": "hidden",
+  "site_reference": null
 }

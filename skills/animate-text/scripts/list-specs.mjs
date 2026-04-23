@@ -35,8 +35,12 @@ const specs = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    custom_renderer: spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null,
-    visible: visibleOrder.has(spec.id),
+    renderer:
+      spec.site_reference?.renderer?.id ??
+      spec.custom_renderer ??
+      catalog.renderer_overrides?.[spec.id] ??
+      null,
+    visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
   }));
 
 process.stdout.write(`${JSON.stringify(specs, null, 2)}\n`);

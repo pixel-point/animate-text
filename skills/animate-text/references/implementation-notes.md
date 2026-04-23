@@ -4,13 +4,21 @@
 
 Use this file as a translation aid after selecting a spec.
 
+## Canonical Contract
+
+- `assets/specs/<id>.json` is the canonical public contract.
+- Use the top-level motion fields for the portable animation definition.
+- Use `site_reference` when you need to reproduce the current website version exactly.
+- There is no separate public effect recipe or example component to consult.
+
 ## General Mapping
 
 - `duration_ms` maps to animation or transition duration.
 - `stagger_ms` maps to per-unit delay.
 - `easing` maps directly to CSS or library easing strings when supported.
 - `from` and `to` map to keyframe endpoints.
-- `swap.mode`, `swap.overlap_ms`, and `swap.micro_delay_ms` define replacement choreography.
+- The portable `swap` block defines the intended text-replacement choreography.
+- The `site_reference.playback` block defines how the current website runtime loops the effect today.
 
 ## Target Splitting
 
@@ -25,6 +33,16 @@ Use this file as a translation aid after selecting a spec.
 - Motion or Framer Motion: map timing and easing into transitions and staggered delays.
 - GSAP: map `from` and `to` fields to `fromTo()` or timeline segments.
 - CSS-only: use generated delays and keyframes when the effect is simple enough; avoid flattening layout-aware choreography into plain CSS when that loses the intended motion.
+
+## Exact Site Reproduction
+
+When reproducing the current website example:
+
+- preserve `site_reference.renderer.id` exactly
+- preserve `site_reference.playback` ordering instead of inferring it from prose
+- preserve `site_reference.runtime.speed_multiplier` and `site_reference.runtime.y_travel_multiplier`
+- preserve `site_reference.stage` values that affect typography, max width, perspective, and kinetic container size
+- preserve the adjustments described in `site_reference.reproduction_notes`
 
 ## Layout-aware Effects
 

@@ -68,12 +68,14 @@ This list should be defined explicitly in app-owned data rather than inferred fr
 
 Promote the relevant spec data from `tmp/specs/` into app-owned source files under a dedicated data area such as:
 
-- `src/data/text-animations/catalog.ts`
-- `src/data/text-animations/catalog-content.ts`
-- `src/data/text-animations/specs/*.json`
+- `catalog/text-animations/catalog.json`
+- `catalog/text-animations/samples.json`
+- `catalog/text-animations/runtime.json`
+- `catalog/text-animations/specs/*.json`
+- `src/data/text-animations/generated/*`
 - `src/data/text-animations/types.ts`
 
-`catalog.ts` defines the 20 visible card IDs and their order. `catalog-content.ts` stores normalized per-card sample text, sample arrays, phrase arrays, and any reference runtime defaults that are only present in `tmp/index.html`. The raw JSON files remain the source of truth for the animation contracts themselves.
+`catalog.json` defines the 20 visible card IDs and their order. `samples.json` stores the normalized per-card sample text, sample arrays, and phrase arrays. `runtime.json` stores the shared website timing multipliers. Generated app modules should consume those catalog JSON files directly or be derived from them; handwritten mirrors such as `catalog-content.ts` should not be maintained in parallel.
 
 The imported data becomes part of the app bundle. The app should not depend on the `tmp/` directory at runtime.
 

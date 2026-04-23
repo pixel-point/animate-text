@@ -1,24 +1,42 @@
-# Spec format
+# Animate Text Spec Format
 
-Every effect in `specs/` is a single JSON file that follows this shape. The format is library-agnostic: any field maps cleanly onto GSAP, Motion One, WAAPI, Framer Motion, CSS, or Lottie.
+Every public effect contract is a single spec JSON file.
+
+The same `spec.json` serves two purposes:
+
+1. portable animation contract
+2. exact site-reference contract for visible website effects
+
+There is no separate public `effect.json` or example-component layer. If an agent needs exact website parity, it should read the spec's generated `site_reference` block.
+
+Portable motion fields live at the top level.
+
+When a spec appears on the current website showcase, it also carries a `site_reference` block that documents the additional renderer, playback, runtime, and stage adjustments needed to match the site version exactly.
+
+Content does not belong in the spec. Sample text stays in `assets/samples.json`.
 
 ## Top-level fields
 
-| Field              | Type   | Description                                                                      |
-| ------------------ | ------ | -------------------------------------------------------------------------------- |
-| `id`               | string | Kebab-case identifier, matches filename (`soft-blur-in` -> `soft-blur-in.json`). |
-| `display_name`     | string | Human-readable name.                                                             |
-| `description`      | string | One-sentence description of what the effect looks like.                          |
-| `inspiration`      | string | Where Apple uses it (freeform reference).                                        |
-| `target`           | enum   | Unit of animation: `per-character`, `per-word`, `per-line`, or `whole`.          |
-| `signature_easing` | string | The dominant easing curve, for reference.                                        |
-| `enter`            | object | Entrance animation block. See below.                                             |
-| `exit`             | object | Exit animation block. Same shape as `enter`.                                     |
-| `swap`             | object | Rules for transitioning from one text to another.                                |
-| `usage_notes`      | string | When to use / avoid, size tips, caveats.                                         |
-| `preview`          | string | Relative path to the HTML preview.                                               |
+| Field              | Type           | Description                                                                         |
+| ------------------ | -------------- | ----------------------------------------------------------------------------------- |
+| `id`               | string         | Kebab-case identifier, matches filename.                                            |
+| `display_name`     | string         | Human-readable name.                                                                |
+| `description`      | string         | One-sentence description of the effect.                                             |
+| `inspiration`      | string         | Freeform design inspiration.                                                        |
+| `target`           | enum           | `whole`, `per-character`, `per-word`, or `per-line`.                                |
+| `signature_easing` | string         | Dominant easing curve for quick identification.                                     |
+| `enter`            | object         | Portable entrance phase.                                                            |
+| `exit`             | object         | Portable exit phase.                                                                |
+| `swap`             | object?        | Portable text-replacement choreography.                                             |
+| `usage_notes`      | string         | Usage guidance and caveats.                                                         |
+| `preview`          | string         | Relative preview path.                                                              |
+| `stagger_mode`     | enum?          | Optional stagger order override.                                                    |
+| `custom_renderer`  | enum?          | Optional portable renderer family hint.                                             |
+| `build`            | object?        | Optional renderer-aware structured parameters.                                      |
+| `visibility`       | enum?          | Generated field: `visible` or `hidden` on the current website.                      |
+| `site_reference`   | object or null | Generated field for exact site reproduction. Hidden effects may set this to `null`. |
 
-## `enter` / `exit` block
+## `enter` / `exit`
 
 ```json
 {
@@ -30,23 +48,30 @@ Every effect in `specs/` is a single JSON file that follows this shape. The form
 }
 ```
 
-- `duration_ms` - duration of one unit's animation.
-- `stagger_ms` - delay added per unit index (`0`, `1 * stagger`, `2 * stagger`, ...).
-- `easing` - any valid CSS easing (`cubic-bezier(...)`, `linear`, `steps(...)`).
-- `from` / `to` - keyframe properties. Known keys:
-  - `opacity` (`0`-`1`)
-  - `x_px`, `y_px` - translate offsets in px
-  - `scale` - uniform scale
-  - `rotate_deg`
-  - `blur_px` - CSS filter blur
-  - `letter_spacing_em`
-  - `color` - hex string, for color transitions
+Fields:
 
-More complex effects may add custom keys; document them in `usage_notes`.
+- `duration_ms`: duration of one animated unit.
+- `stagger_ms`: per-unit delay step.
+- `easing`: CSS easing string.
+- `from` / `to`: keyframe endpoints using the supported frame keys below.
 
-## `swap` block
+## Supported frame keys
 
-Defines how a text changes into another text using this effect.
+- `opacity`
+- `x_px`
+- `y_px`
+- `z_px`
+- `scale`
+- `rotate_deg`
+- `rotate_x_deg`
+- `rotate_y_deg`
+- `blur_px`
+- `letter_spacing_em`
+- `color`
+
+## `swap`
+
+`swap` is the portable text-replacement contract.
 
 ```json
 {
@@ -67,24 +92,188 @@ Defines how a text changes into another text using this effect.
 }
 ```
 
-- `mode`:
-  - `crossfade` - old runs `exit` while new runs `enter`, with overlap.
-  - `sequential` - old fully exits, then new enters.
-  - `morph` - per-character morph between old and new (only for effects that support it, e.g. `glyph-morph`).
-- `overlap_ms` - how many ms the `enter` of the new text starts _before_ the `exit` of the old finishes.
-- `micro_delay_ms` (optional) - additional delay after old text exit before new text enter starts.
-- `scenario_spec` (optional object) - explicit behavioral contract for a concrete switch scenario:
-  - `entry_condition` (string) - trigger and preconditions.
-  - `switch_order` (string[]) - ordered steps for the switch timeline.
-  - `verification` (string[]) - expected result checks.
-  - `fallback` (object) - mitigation plan when checks fail.
+Fields:
 
-## Naming convention
+- `mode`
+  - `crossfade`
+  - `sequential`
+  - `morph`
+- `overlap_ms`
+- `micro_delay_ms`
+- `scenario_spec`
 
-- Files: `kebab-case.json`
-- IDs: same as filename without extension
-- Previews: `previews/<id>.html`
+Important:
 
-## Keeping specs tech-agnostic
+- `swap` describes the portable motion contract.
+- `site_reference.playback` describes the current website implementation.
+- For exact site parity, follow `site_reference.playback` when it adds or overrides loop behavior.
 
-A spec should never reference a specific library. If an effect _can only_ be built with a specific technique (e.g. SVG filter, canvas shader), note that in `usage_notes` rather than in the keyframe block.
+## `stagger_mode`
+
+Supported values:
+
+- `normal`
+- `center-out`
+- `edges-in`
+- `reverse`
+
+## `custom_renderer`
+
+Supported values:
+
+- `kinetic-center-build`
+- `kinetic-top-build`
+- `shared-slide-opacity-stage`
+
+This field is a portable renderer hint. The resolved current website renderer is described in `site_reference.renderer`.
+
+## `build`
+
+`build` carries structured renderer-aware parameters.
+
+Known keys:
+
+- `entry_direction`
+- `line_alignment`
+- `first_word_duration_ms`
+- `push_duration_ms`
+- `exit_duration_ms`
+- `hold_ms`
+- `between_phrases_ms`
+- `entry_offset_px`
+- `entry_offset_y_px`
+- `word_gap_px`
+- `line_gap_px`
+- `first_word_y_px`
+- `entry_scale`
+- `entry_blur_px`
+- `reflow_blur_px`
+- `exit_y_px`
+- `exit_blur_px`
+- `easing`
+- `exit_easing`
+- `phrase_samples`
+- `word_opacity_duration_ms`
+- `word_opacity_from`
+- `word_opacity_to`
+
+## `site_reference`
+
+`site_reference` is generated metadata for reproducing the current website version exactly.
+
+It does not carry content. Instead it points to the sample asset entry for the effect.
+
+```json
+{
+  "sample_source": {
+    "asset": "assets/samples.json",
+    "key": "soft-blur-in"
+  },
+  "renderer": {
+    "id": "generic-stagger",
+    "source": "default",
+    "params": {}
+  },
+  "runtime": {
+    "preset": "website-default",
+    "speed_multiplier": 0.72,
+    "hold_ms": 550,
+    "gap_ms": 320,
+    "y_travel_multiplier": 0.58,
+    "initial_delay_ms": {
+      "mode": "random-range",
+      "min": 0,
+      "max": 400
+    }
+  },
+  "playback": {
+    "kind": "loop",
+    "cycle": ["enter", "hold", "exit", "micro-delay", "gap"],
+    "replacement_behavior": "exit-before-enter",
+    "hold_ms": 550,
+    "micro_delay_ms": 35,
+    "gap_ms": 320
+  },
+  "stage": {
+    "preset": "default-title-card"
+  },
+  "reproduction_notes": ["Paragraph 1", "Paragraph 2"]
+}
+```
+
+### `site_reference.sample_source`
+
+Points to the sample content needed to mirror the current website demo.
+
+Fields:
+
+- `asset`
+- `key`
+
+### `site_reference.renderer`
+
+Resolved website renderer for the current effect.
+
+Fields:
+
+- `id`
+  - `generic-stagger`
+  - `shared-slide-opacity-stage`
+  - `kinetic-center-build`
+  - `kinetic-top-build`
+- `source`
+  - `default`
+  - `spec`
+  - `catalog-override`
+- `params`
+  - structured renderer-specific data used by the current website version
+
+### `site_reference.runtime`
+
+Resolved runtime transforms applied by the current website loop.
+
+Fields:
+
+- `preset`
+- `speed_multiplier`
+- `hold_ms`
+- `gap_ms`
+- `y_travel_multiplier`
+- `initial_delay_ms`
+
+### `site_reference.playback`
+
+Explicit current website playback behavior.
+
+Fields:
+
+- `kind`
+- `cycle`
+- `replacement_behavior`
+- `hold_ms`
+- `micro_delay_ms`
+- `gap_ms`
+
+Typical `cycle` values:
+
+- `["enter", "hold", "exit", "micro-delay", "gap"]`
+- `["enter", "hold", "exit", "gap"]`
+- `["build-phrase", "hold", "exit-phrase", "gap"]`
+
+### `site_reference.stage`
+
+Resolved website stage treatment for the effect.
+
+Fields vary by preset, but may include:
+
+- `container`
+- `title`
+- `unit`
+- `kinetic_container`
+- `kinetic_word`
+
+### `site_reference.reproduction_notes`
+
+Array of short paragraphs describing the additional site-specific transformations that an implementation should preserve to match the website visually.
+
+This field is the main prose guidance for agents reproducing the site version in another stack.

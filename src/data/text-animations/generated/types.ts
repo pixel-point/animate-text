@@ -51,6 +51,53 @@ export interface TextAnimationBuildSpec {
   [key: string]: unknown;
 }
 
+export interface TextAnimationSiteReferenceSampleSource {
+  asset: string;
+  key: string;
+}
+
+export interface TextAnimationSiteReferenceRenderer {
+  id: 'generic-stagger' | TextAnimationRenderer;
+  source: 'default' | 'spec' | 'catalog-override';
+  params: Record<string, unknown>;
+}
+
+export interface TextAnimationSiteReferenceRuntime {
+  preset: string;
+  speed_multiplier: number;
+  hold_ms: number;
+  gap_ms: number;
+  y_travel_multiplier: number;
+  initial_delay_ms: {
+    mode: string;
+    min: number;
+    max: number;
+  };
+}
+
+export interface TextAnimationSiteReferencePlayback {
+  kind: string;
+  cycle: string[];
+  replacement_behavior: string;
+  hold_ms: number;
+  micro_delay_ms: number;
+  gap_ms: number;
+}
+
+export interface TextAnimationSiteReferenceStage {
+  preset: string;
+  [key: string]: unknown;
+}
+
+export interface TextAnimationSiteReference {
+  sample_source: TextAnimationSiteReferenceSampleSource;
+  renderer: TextAnimationSiteReferenceRenderer;
+  runtime: TextAnimationSiteReferenceRuntime;
+  playback: TextAnimationSiteReferencePlayback;
+  stage: TextAnimationSiteReferenceStage;
+  reproduction_notes: string[];
+}
+
 export interface TextAnimationSpec {
   id: string;
   display_name: string;
@@ -63,12 +110,11 @@ export interface TextAnimationSpec {
   swap?: TextAnimationSwapSpec;
   usage_notes: string;
   preview: string;
-  sample?: string;
-  samples?: string[];
-  phrases?: string[][];
   custom_renderer?: TextAnimationRenderer;
   stagger_mode?: TextAnimationStaggerMode;
   build?: TextAnimationBuildSpec;
+  visibility?: 'visible' | 'hidden';
+  site_reference?: TextAnimationSiteReference | null;
 }
 
 export interface TextAnimationContent {

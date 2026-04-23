@@ -22,6 +22,68 @@ const validRendererOverrides = new Set([
   'kinetic-top-build',
   'shared-slide-opacity-stage',
 ]);
+const validShowcaseRenderers = new Set(['generic-stagger', ...validRendererOverrides]);
+const allowedTopLevelSpecKeys = new Set([
+  'id',
+  'display_name',
+  'description',
+  'inspiration',
+  'target',
+  'signature_easing',
+  'enter',
+  'exit',
+  'swap',
+  'usage_notes',
+  'preview',
+  'custom_renderer',
+  'stagger_mode',
+  'build',
+]);
+const allowedFrameKeys = new Set([
+  'opacity',
+  'x_px',
+  'y_px',
+  'z_px',
+  'scale',
+  'rotate_deg',
+  'rotate_x_deg',
+  'rotate_y_deg',
+  'blur_px',
+  'letter_spacing_em',
+  'color',
+]);
+const allowedSwapKeys = new Set(['mode', 'overlap_ms', 'micro_delay_ms', 'scenario_spec']);
+const allowedScenarioKeys = new Set([
+  'entry_condition',
+  'switch_order',
+  'verification',
+  'fallback',
+]);
+const allowedBuildKeys = new Set([
+  'entry_direction',
+  'line_alignment',
+  'first_word_duration_ms',
+  'push_duration_ms',
+  'exit_duration_ms',
+  'hold_ms',
+  'between_phrases_ms',
+  'entry_offset_px',
+  'entry_offset_y_px',
+  'word_gap_px',
+  'line_gap_px',
+  'first_word_y_px',
+  'entry_scale',
+  'entry_blur_px',
+  'reflow_blur_px',
+  'exit_y_px',
+  'exit_blur_px',
+  'easing',
+  'exit_easing',
+  'phrase_samples',
+  'word_opacity_duration_ms',
+  'word_opacity_from',
+  'word_opacity_to',
+]);
 
 function stripBom(text) {
   return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
@@ -121,6 +183,248 @@ function getRendererForId(spec, rendererOverrides) {
   return spec.custom_renderer ?? rendererOverrides[spec.id] ?? null;
 }
 
+function getShowcaseRendererForId(spec, rendererOverrides) {
+  return getRendererForId(spec, rendererOverrides) ?? 'generic-stagger';
+}
+
+function createRuntimePresets(runtime) {
+  return {
+    'website-default': {
+      speed_multiplier: runtime.tileSpeed,
+      hold_ms: runtime.tileHoldMs,
+      gap_ms: runtime.tileGapMs,
+      y_travel_multiplier: runtime.tileYTravel,
+      initial_delay_ms: {
+        mode: 'random-range',
+        min: 0,
+        max: 400,
+      },
+    },
+  };
+}
+
+function createStagePresets() {
+  return {
+    'default-title-card': {
+      container: {
+        container_type: 'inline-size',
+        padding: 'clamp(1rem, 5cqi, 1.5rem)',
+        perspective_px: 900,
+      },
+      title: {
+        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+        font_weight: 580,
+        letter_spacing_em: -0.022,
+        line_height: 1.08,
+        max_width: 'min(92%, 18ch)',
+        text_align: 'center',
+        text_wrap: 'balance',
+      },
+      unit: {
+        display: 'inline-block',
+        transform_origin: '50% 55%',
+        white_space: 'pre',
+      },
+    },
+    'kinetic-line-card': {
+      base_preset: 'default-title-card',
+      kinetic_container: {
+        width: 'min(92%, 270px)',
+        height_px: 72,
+        position: 'relative',
+      },
+      kinetic_word: {
+        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+        font_weight: 580,
+        letter_spacing_em: -0.02,
+        line_height: 1.1,
+        white_space: 'nowrap',
+        absolute_centered: true,
+      },
+    },
+    'kinetic-stack-card': {
+      base_preset: 'default-title-card',
+      kinetic_container: {
+        width: 'min(92%, 270px)',
+        height_px: 132,
+        position: 'relative',
+      },
+      kinetic_word: {
+        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+        font_weight: 580,
+        letter_spacing_em: -0.02,
+        line_height: 1.1,
+        white_space: 'nowrap',
+        absolute_centered: true,
+      },
+    },
+  };
+}
+
+function getStagePresetId(renderer) {
+  if (renderer === 'kinetic-center-build') {
+    return 'kinetic-line-card';
+  }
+
+  if (renderer === 'kinetic-top-build') {
+    return 'kinetic-stack-card';
+  }
+
+  return 'default-title-card';
+}
+
+function createShowcaseRenderer(spec, renderer) {
+  let source = 'default';
+
+  if (spec.custom_renderer) {
+    source = 'spec';
+  } else if (renderer !== 'generic-stagger') {
+    source = 'catalog-override';
+  }
+
+  const build = spec.build ?? {};
+
+  return {
+    id: renderer,
+    source,
+    params:
+      renderer === 'generic-stagger'
+        ? spec.stagger_mode
+          ? { stagger_mode: spec.stagger_mode }
+          : {}
+        : build,
+  };
+}
+
+function scaleDuration(value, fallback, speed, minimum) {
+  return Math.max(minimum, Math.round((value ?? fallback) * speed));
+}
+
+function createShowcasePlayback(spec, renderer, runtimePreset) {
+  const build = spec.build ?? {};
+  const microDelayMs = spec.swap?.micro_delay_ms ?? 0;
+
+  if (renderer === 'kinetic-center-build') {
+    return {
+      kind: 'loop',
+      cycle: ['build-phrase', 'hold', 'exit-phrase', 'gap'],
+      replacement_behavior: 'phrase-loop',
+      hold_ms: scaleDuration(build.hold_ms, 980, runtimePreset.speed_multiplier, 380),
+      micro_delay_ms: 0,
+      gap_ms: scaleDuration(build.between_phrases_ms, 220, runtimePreset.speed_multiplier, 120),
+    };
+  }
+
+  if (renderer === 'kinetic-top-build') {
+    return {
+      kind: 'loop',
+      cycle: ['build-phrase', 'hold', 'exit-phrase', 'gap'],
+      replacement_behavior: 'phrase-loop',
+      hold_ms: scaleDuration(build.hold_ms, 1100, runtimePreset.speed_multiplier, 380),
+      micro_delay_ms: 0,
+      gap_ms: scaleDuration(build.between_phrases_ms, 220, runtimePreset.speed_multiplier, 120),
+    };
+  }
+
+  if (renderer === 'shared-slide-opacity-stage') {
+    return {
+      kind: 'loop',
+      cycle: ['enter', 'hold', 'exit', 'gap'],
+      replacement_behavior: 'exit-before-enter',
+      hold_ms: Math.max(380, runtimePreset.hold_ms),
+      micro_delay_ms: 0,
+      gap_ms: Math.max(180, runtimePreset.gap_ms),
+    };
+  }
+
+  return {
+    kind: 'loop',
+    cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+    replacement_behavior: 'exit-before-enter',
+    hold_ms: runtimePreset.hold_ms,
+    micro_delay_ms: microDelayMs,
+    gap_ms: runtimePreset.gap_ms,
+  };
+}
+
+function createSiteReproductionNotes(renderer, runtimePreset) {
+  const notes = [];
+
+  if (renderer === 'kinetic-center-build') {
+    notes.push(
+      'On the site this effect is layout-aware. Measure word widths, compute centered x positions for the whole phrase, and animate existing words to their next positions while the incoming word enters from the right.',
+    );
+  } else if (renderer === 'kinetic-top-build') {
+    notes.push(
+      'On the site this effect builds a centered vertical stack. Measure line heights, compute centered y positions for the stack, and animate existing words upward as the incoming word drops into the next line.',
+    );
+  } else if (renderer === 'shared-slide-opacity-stage') {
+    notes.push(
+      'On the site this effect moves the full phrase as one shared horizontal transform. Preserve a single phrase-level translation and reveal word order only through opacity timing.',
+    );
+  } else {
+    notes.push(
+      'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+    );
+  }
+
+  notes.push(
+    `For site parity, scale duration and stagger timing by ${runtimePreset.speed_multiplier} and scale vertical travel by ${runtimePreset.y_travel_multiplier}. These runtime transforms materially affect the perceived pace and distance.`,
+  );
+  notes.push(
+    'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+  );
+
+  return notes;
+}
+
+function createPublicSpec(
+  spec,
+  visibleSet,
+  samples,
+  runtimePresets,
+  stagePresets,
+  rendererOverrides,
+) {
+  const visibility = visibleSet.has(spec.id) ? 'visible' : 'hidden';
+
+  if (visibility !== 'visible' || !samples[spec.id]) {
+    return {
+      ...spec,
+      visibility,
+      site_reference: null,
+    };
+  }
+
+  const runtimePresetKey = 'website-default';
+  const renderer = getShowcaseRendererForId(spec, rendererOverrides);
+  const stagePresetKey = getStagePresetId(renderer);
+  const runtimePreset = runtimePresets[runtimePresetKey];
+  const stagePreset = stagePresets[stagePresetKey];
+
+  return {
+    ...spec,
+    visibility,
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: spec.id,
+      },
+      renderer: createShowcaseRenderer(spec, renderer),
+      runtime: {
+        preset: runtimePresetKey,
+        ...runtimePreset,
+      },
+      playback: createShowcasePlayback(spec, renderer, runtimePreset),
+      stage: {
+        preset: stagePresetKey,
+        ...stagePreset,
+      },
+      reproduction_notes: createSiteReproductionNotes(renderer, runtimePreset),
+    },
+  };
+}
+
 function toGeneratedTsConst(constName, value, trailing) {
   return `export const ${constName} = ${JSON.stringify(value, null, 2)}${trailing}\n`;
 }
@@ -178,6 +482,53 @@ export interface TextAnimationBuildSpec {
   [key: string]: unknown;
 }
 
+export interface TextAnimationSiteReferenceSampleSource {
+  asset: string;
+  key: string;
+}
+
+export interface TextAnimationSiteReferenceRenderer {
+  id: 'generic-stagger' | TextAnimationRenderer;
+  source: 'default' | 'spec' | 'catalog-override';
+  params: Record<string, unknown>;
+}
+
+export interface TextAnimationSiteReferenceRuntime {
+  preset: string;
+  speed_multiplier: number;
+  hold_ms: number;
+  gap_ms: number;
+  y_travel_multiplier: number;
+  initial_delay_ms: {
+    mode: string;
+    min: number;
+    max: number;
+  };
+}
+
+export interface TextAnimationSiteReferencePlayback {
+  kind: string;
+  cycle: string[];
+  replacement_behavior: string;
+  hold_ms: number;
+  micro_delay_ms: number;
+  gap_ms: number;
+}
+
+export interface TextAnimationSiteReferenceStage {
+  preset: string;
+  [key: string]: unknown;
+}
+
+export interface TextAnimationSiteReference {
+  sample_source: TextAnimationSiteReferenceSampleSource;
+  renderer: TextAnimationSiteReferenceRenderer;
+  runtime: TextAnimationSiteReferenceRuntime;
+  playback: TextAnimationSiteReferencePlayback;
+  stage: TextAnimationSiteReferenceStage;
+  reproduction_notes: string[];
+}
+
 export interface TextAnimationSpec {
   id: string;
   display_name: string;
@@ -190,12 +541,11 @@ export interface TextAnimationSpec {
   swap?: TextAnimationSwapSpec;
   usage_notes: string;
   preview: string;
-  sample?: string;
-  samples?: string[];
-  phrases?: string[][];
   custom_renderer?: TextAnimationRenderer;
   stagger_mode?: TextAnimationStaggerMode;
   build?: TextAnimationBuildSpec;
+  visibility?: 'visible' | 'hidden';
+  site_reference?: TextAnimationSiteReference | null;
 }
 
 export interface TextAnimationContent {
@@ -225,21 +575,22 @@ function createRuntimeModule(runtime) {
 ${toGeneratedTsConst('TEXT_ANIMATION_RUNTIME', runtime, ' satisfies TextAnimationRuntimeConfig;')}`;
 }
 
-function createContentModule(samples) {
-  return `${generatedTsBanner}import type { TextAnimationContent } from './types';
-
-${toGeneratedTsConst('TEXT_ANIMATION_CONTENT', samples, ' satisfies Record<string, TextAnimationContent>;')}`;
-}
-
-function createSpecsModule(visibleIds, specsById, rendererOverrides) {
+function createSpecsModule(visibleIds, specsById, samples, runtime, rendererOverrides) {
+  const visibleSet = new Set(visibleIds);
+  const runtimePresets = createRuntimePresets(runtime);
+  const stagePresets = createStagePresets();
   const visibleSpecs = {};
 
   for (const id of visibleIds) {
     const spec = specsById[id];
-    const renderer = getRendererForId(spec, rendererOverrides);
-
-    visibleSpecs[id] =
-      renderer && !spec.custom_renderer ? { ...spec, custom_renderer: renderer } : spec;
+    visibleSpecs[id] = createPublicSpec(
+      spec,
+      visibleSet,
+      samples,
+      runtimePresets,
+      stagePresets,
+      rendererOverrides,
+    );
   }
 
   return `${generatedTsBanner}import type { TextAnimationSpec } from './types';
@@ -248,9 +599,12 @@ ${toGeneratedTsConst('TEXT_ANIMATION_SPECS', visibleSpecs, ' satisfies Record<st
 }
 
 function createCatalogModule(visibleIds) {
-  return `${generatedTsBanner}import { TEXT_ANIMATION_CONTENT } from './content';
+  return `${generatedTsBanner}import TEXT_ANIMATION_CONTENT_JSON from '../../../../catalog/text-animations/samples.json';
 import { TEXT_ANIMATION_SPECS } from './specs';
-import type { TextAnimationCatalogItem } from './types';
+import type { TextAnimationCatalogItem, TextAnimationContent } from './types';
+
+export const TEXT_ANIMATION_CONTENT =
+  TEXT_ANIMATION_CONTENT_JSON satisfies Record<string, TextAnimationContent>;
 
 export const TEXT_ANIMATION_CATALOG = ${JSON.stringify(visibleIds, null, 2)} as const;
 
@@ -306,8 +660,8 @@ const specs = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    custom_renderer: spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null,
-    visible: visibleOrder.has(spec.id),
+    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null,
+    visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
   }));
 
 process.stdout.write(\`\${JSON.stringify(specs, null, 2)}\\n\`);
@@ -352,7 +706,7 @@ function scoreSpec(spec, query, terms) {
   const inspiration = spec.inspiration.toLowerCase();
   const usageNotes = spec.usage_notes.toLowerCase();
   const target = spec.target.toLowerCase();
-  const renderer = (spec.custom_renderer ?? '').toLowerCase();
+  const renderer = (spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? '').toLowerCase();
 
   if (id === query) score += 120;
   if (displayName === query) score += 100;
@@ -391,12 +745,9 @@ const results = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
   .map((fileName) => readJson(new URL(\`../assets/specs/\${fileName}\`, import.meta.url)))
   .map((spec) => {
-    const customRenderer = spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null;
-    const enriched = customRenderer ? { ...spec, custom_renderer: customRenderer } : spec;
-
     return {
-      spec: enriched,
-      score: scoreSpec(enriched, query, terms),
+      spec,
+      score: scoreSpec(spec, query, terms),
     };
   })
   .filter((entry) => entry.score > 0)
@@ -428,8 +779,8 @@ const results = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    custom_renderer: spec.custom_renderer ?? null,
-    visible: visibleOrder.has(spec.id),
+    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? null,
+    visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
     score,
   }));
 
@@ -467,6 +818,18 @@ export function validateCatalogData(data) {
   const errors = [];
   const { catalog, runtime, samples, specFiles, specsById } = data;
   const seenIds = new Set();
+  const runtimePresets = createRuntimePresets(runtime);
+  const stagePresets = createStagePresets();
+  const visibleIds = catalog.visible_ids ?? [];
+  const rendererOverrides = catalog.renderer_overrides ?? {};
+
+  const validateKeys = (fileName, value, allowedKeys, label) => {
+    for (const key of Object.keys(value ?? {})) {
+      if (!allowedKeys.has(key)) {
+        errors.push(`${fileName} contains unsupported ${label} field "${key}".`);
+      }
+    }
+  };
 
   for (const fileName of specFiles) {
     const spec = readJson(join(catalogSpecRoot, fileName));
@@ -485,10 +848,35 @@ export function validateCatalogData(data) {
     if (!validTargets.has(spec.target)) {
       errors.push(`Unsupported target "${spec.target}" in ${fileName}.`);
     }
-  }
 
-  const visibleIds = catalog.visible_ids ?? [];
-  const rendererOverrides = catalog.renderer_overrides ?? {};
+    validateKeys(fileName, spec, allowedTopLevelSpecKeys, 'spec');
+
+    if (spec.custom_renderer && !validRendererOverrides.has(spec.custom_renderer)) {
+      errors.push(`Unsupported custom_renderer "${spec.custom_renderer}" in ${fileName}.`);
+    }
+
+    if (spec.enter) {
+      validateKeys(fileName, spec.enter.from ?? {}, allowedFrameKeys, 'enter.from');
+      validateKeys(fileName, spec.enter.to ?? {}, allowedFrameKeys, 'enter.to');
+    }
+
+    if (spec.exit) {
+      validateKeys(fileName, spec.exit.from ?? {}, allowedFrameKeys, 'exit.from');
+      validateKeys(fileName, spec.exit.to ?? {}, allowedFrameKeys, 'exit.to');
+    }
+
+    if (spec.swap) {
+      validateKeys(fileName, spec.swap, allowedSwapKeys, 'swap');
+
+      if (spec.swap.scenario_spec) {
+        validateKeys(fileName, spec.swap.scenario_spec, allowedScenarioKeys, 'swap.scenario_spec');
+      }
+    }
+
+    if (spec.build) {
+      validateKeys(fileName, spec.build, allowedBuildKeys, 'build');
+    }
+  }
 
   if (new Set(visibleIds).size !== visibleIds.length) {
     errors.push('catalog.json contains duplicate visible_ids entries.');
@@ -526,6 +914,45 @@ export function validateCatalogData(data) {
     }
   }
 
+  for (const id of visibleIds) {
+    const spec = specsById[id];
+    const renderer = getShowcaseRendererForId(spec, rendererOverrides);
+
+    if (!validShowcaseRenderers.has(renderer)) {
+      errors.push(
+        `Visible effect "${id}" resolves to unsupported showcase renderer "${renderer}".`,
+      );
+    }
+
+    if (!samples[id]) {
+      errors.push(`Visible effect "${id}" is missing showcase content.`);
+    }
+
+    const runtimePreset = runtimePresets['website-default'];
+    const stagePreset = stagePresets[getStagePresetId(renderer)];
+
+    if (!runtimePreset) {
+      errors.push(`Visible effect "${id}" is missing runtime preset "website-default".`);
+    }
+
+    if (!stagePreset) {
+      errors.push(`Visible effect "${id}" resolves to missing stage preset.`);
+    }
+
+    const publicSpec = createPublicSpec(
+      spec,
+      new Set(visibleIds),
+      samples,
+      runtimePresets,
+      stagePresets,
+      rendererOverrides,
+    );
+
+    if (!publicSpec.site_reference) {
+      errors.push(`Visible effect "${id}" did not generate a site_reference block.`);
+    }
+  }
+
   if (errors.length > 0) {
     throw new Error(errors.join('\n'));
   }
@@ -535,6 +962,8 @@ export function buildArtifacts(data) {
   const { catalog, runtime, samples, schemaText, specsById } = data;
   const visibleIds = catalog.visible_ids;
   const rendererOverrides = catalog.renderer_overrides ?? {};
+  const runtimePresets = createRuntimePresets(runtime);
+  const stagePresets = createStagePresets();
   const allIds = orderIds(Object.keys(specsById), visibleIds);
   const visibleSet = new Set(visibleIds);
   const allSpecs = allIds.map((id) => {
@@ -581,13 +1010,8 @@ export function buildArtifacts(data) {
     },
     {
       root: appGeneratedRoot,
-      relativePath: 'content.ts',
-      content: createContentModule(samples),
-    },
-    {
-      root: appGeneratedRoot,
       relativePath: 'specs.ts',
-      content: createSpecsModule(visibleIds, specsById, rendererOverrides),
+      content: createSpecsModule(visibleIds, specsById, samples, runtime, rendererOverrides),
     },
     {
       root: appGeneratedRoot,
@@ -626,11 +1050,6 @@ export function buildArtifacts(data) {
     },
     {
       root: skillRoot,
-      relativePath: 'assets/runtime.json',
-      content: toJson(runtime),
-    },
-    {
-      root: skillRoot,
       relativePath: 'assets/samples.json',
       content: toJson(samples),
     },
@@ -655,7 +1074,16 @@ export function buildArtifacts(data) {
     artifacts.push({
       root: skillRoot,
       relativePath: join('assets', 'specs', `${id}.json`),
-      content: toJson(spec),
+      content: toJson(
+        createPublicSpec(
+          spec,
+          visibleSet,
+          samples,
+          runtimePresets,
+          stagePresets,
+          rendererOverrides,
+        ),
+      ),
     });
   }
 

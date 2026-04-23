@@ -66,6 +66,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       "Works best on hero titles 48px+ against solid backgrounds. On body text (<24px), reduce blur_px to 6 and stagger_ms to 15. Avoid on very long strings (>40 chars) — total stagger becomes too long; in that case switch target to 'per-word'.",
     preview: './previews/soft-blur-in.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'soft-blur-in',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 0,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'per-character-rise': {
     id: 'per-character-rise',
@@ -126,6 +185,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       "Works on 40px+ headlines. Zero blur keeps it sharp — that's the key distinction from soft-blur-in. Stagger 24ms gives it quicker momentum; don't go below 16ms or it flattens.",
     preview: './previews/per-character-rise.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'per-character-rise',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 0,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'per-word-crossfade': {
     id: 'per-word-crossfade',
@@ -188,6 +306,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Best for medium phrases and headings; for long copy prefer per-word only up to 16–18 words to keep total stagger time readable. micro_delay_ms helps prevent old/new words from visibly stacking during swaps.',
     preview: './previews/per-word-crossfade.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'per-word-crossfade',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 70,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'spring-scale-in': {
     id: 'spring-scale-in',
@@ -232,6 +409,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'The overshoot comes from cubic-bezier y2 > 1 (1.56). Per-word is the sweet spot - per-character at this easing feels too bouncy. Stagger is intentionally high here to create a visible staircase effect. This variant uses no overlap on swap to avoid content crossing during transitions.',
     preview: './previews/spring-scale-in.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'spring-scale-in',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'mask-reveal-up': {
     id: 'mask-reveal-up',
@@ -277,6 +513,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Best for two-line and three-line headings where line order should stay readable.',
     preview: './previews/mask-reveal-up.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'mask-reveal-up',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'line-by-line-slide': {
     id: 'line-by-line-slide',
@@ -320,6 +615,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Great for 2-line or 3-line headings. This variant keeps swap non-overlapping to avoid content intersections. Reduce x-distance for narrow layouts to keep motion tight on mobile.',
     preview: './previews/line-by-line-slide.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'line-by-line-slide',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 20,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   typewriter: {
     id: 'typewriter',
@@ -361,6 +715,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Good for short copy. Keep line length moderate so stepping stays intentional.',
     preview: './previews/typewriter.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'typewriter',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 85,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'micro-scale-fade': {
     id: 'micro-scale-fade',
@@ -404,6 +817,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Use this for single words or short titles. This variant keeps swap non-overlapping to avoid content intersections. For paragraphs, switch target to per-word to avoid perceivable lag.',
     preview: './previews/micro-scale-fade.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'micro-scale-fade',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 20,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'shimmer-sweep': {
     id: 'shimmer-sweep',
@@ -451,6 +923,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Use as a premium micro-transition for title swaps and copy refreshes. This variant avoids overlap between outgoing and incoming text.',
     preview: './previews/shimmer-sweep.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'shimmer-sweep',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 36,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'fade-through': {
     id: 'fade-through',
@@ -501,6 +1032,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Best for replacing content in the same layout slot without directional meaning.',
     preview: './previews/fade-through.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'fade-through',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 60,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'shared-axis-y': {
     id: 'shared-axis-y',
@@ -547,6 +1137,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Use for bold word-by-word hard cuts. No overlap keeps phrase swaps visually clean.',
     preview: './previews/shared-axis-y.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'shared-axis-y',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 28,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'shared-axis-z': {
     id: 'shared-axis-z',
@@ -592,6 +1241,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Use for emphasizing focus transitions where scale communicates depth.',
     preview: './previews/shared-axis-z.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'shared-axis-z',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 20,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'blur-out-up': {
     id: 'blur-out-up',
@@ -637,6 +1345,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Works best on short phrases; avoid very long lines to keep swap time tight.',
     preview: './previews/blur-out-up.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'blur-out-up',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'scale-down-fade': {
     id: 'scale-down-fade',
@@ -682,6 +1449,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Safe default for product UIs where copy should feel polished but not animated.',
     preview: './previews/scale-down-fade.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'scale-down-fade',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 20,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'focus-blur-resolve': {
     id: 'focus-blur-resolve',
@@ -731,6 +1557,65 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes: 'Best on large headlines where blur distance reads as intentional and premium.',
     preview: './previews/focus-blur-resolve.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'focus-blur-resolve',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'bottom-up-letters': {
     id: 'bottom-up-letters',
@@ -793,6 +1678,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Best for short single words, labels, or compact headline swaps at 40px+. This version is intentionally more staged than per-character-rise: very large per-symbol delay, fewer simultaneous letters on screen, and a taller lift from below.',
     preview: './previews/bottom-up-letters.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'bottom-up-letters',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'top-down-letters': {
     id: 'top-down-letters',
@@ -855,6 +1799,65 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Best for short single words, labels, or compact headline swaps at 40px+. This is the top-down counterpart to bottom-up-letters: very large per-symbol delay, fewer simultaneous letters on screen, and a tall drop from above.',
     preview: './previews/top-down-letters.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'top-down-letters',
+      },
+      renderer: {
+        id: 'generic-stagger',
+        source: 'default',
+        params: {},
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'micro-delay', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 35,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'kinetic-center-build': {
     id: 'kinetic-center-build',
@@ -943,7 +1946,80 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Layout-aware effect: each incoming word changes the target x-position of the whole line. Best for short three-word phrases; implementation requires measuring word widths and animating existing words to new positions. A small entry and reflow blur helps the push feel smoother without extending the timing.',
     preview: './previews/kinetic-center-build.html',
-    custom_renderer: 'kinetic-center-build',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'kinetic-center-build',
+      },
+      renderer: {
+        id: 'kinetic-center-build',
+        source: 'catalog-override',
+        params: {
+          entry_direction: 'from-right',
+          line_alignment: 'center',
+          first_word_duration_ms: 340,
+          push_duration_ms: 430,
+          entry_offset_px: 88,
+          word_gap_px: 10,
+          first_word_y_px: 6,
+          entry_scale: 0.992,
+          entry_blur_px: 3.5,
+          reflow_blur_px: 0.8,
+          exit_y_px: -6,
+          exit_blur_px: 2.5,
+          easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+          exit_easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          phrase_samples: [
+            ['Words', 'push', 'left'],
+            ['Type', 'locks', 'center'],
+            ['Build', 'the', 'line'],
+          ],
+        },
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['build-phrase', 'hold', 'exit-phrase', 'gap'],
+        replacement_behavior: 'phrase-loop',
+        hold_ms: 706,
+        micro_delay_ms: 0,
+        gap_ms: 158,
+      },
+      stage: {
+        preset: 'kinetic-line-card',
+        base_preset: 'default-title-card',
+        kinetic_container: {
+          width: 'min(92%, 270px)',
+          height_px: 72,
+          position: 'relative',
+        },
+        kinetic_word: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.02,
+          line_height: 1.1,
+          white_space: 'nowrap',
+          absolute_centered: true,
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect is layout-aware. Measure word widths, compute centered x positions for the whole phrase, and animate existing words to their next positions while the incoming word enters from the right.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'short-slide-right': {
     id: 'short-slide-right',
@@ -1016,6 +2092,69 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Best on three-word headings where word order matters. Keep the horizontal travel compact and shared; the phrase should read as one move, with staging communicated only by opacity. For longer phrases, reduce stagger_ms or shorten the opacity duration so the cascade does not drag.',
     preview: './previews/short-slide-right.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'short-slide-right',
+      },
+      renderer: {
+        id: 'shared-slide-opacity-stage',
+        source: 'spec',
+        params: {
+          word_opacity_duration_ms: 210,
+          word_opacity_from: 0,
+          word_opacity_to: 1,
+        },
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['enter', 'hold', 'exit', 'gap'],
+        replacement_behavior: 'exit-before-enter',
+        hold_ms: 550,
+        micro_delay_ms: 0,
+        gap_ms: 320,
+      },
+      stage: {
+        preset: 'default-title-card',
+        container: {
+          container_type: 'inline-size',
+          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          perspective_px: 900,
+        },
+        title: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.022,
+          line_height: 1.08,
+          max_width: 'min(92%, 18ch)',
+          text_align: 'center',
+          text_wrap: 'balance',
+        },
+        unit: {
+          display: 'inline-block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect moves the full phrase as one shared horizontal transform. Preserve a single phrase-level translation and reveal word order only through opacity timing.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
   'short-slide-down': {
     id: 'short-slide-down',
@@ -1077,12 +2216,6 @@ export const TEXT_ANIMATION_SPECS = {
       easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
       exit_easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
     },
-    sample: 'Build from above.',
-    phrases: [
-      ['Drop', 'into', 'place'],
-      ['Words', 'settle', 'lower'],
-      ['Build', 'from', 'above'],
-    ],
     swap: {
       mode: 'sequential',
       overlap_ms: 0,
@@ -1109,5 +2242,75 @@ export const TEXT_ANIMATION_SPECS = {
     usage_notes:
       'Best on short three-word headings where each word can live on its own line. Keep the vertical drop compact so the motion still feels editorial, and let the stacking displacement carry most of the energy. For longer phrases, reduce entry_offset_y_px or switch to a softer shared-slide pattern.',
     preview: './previews/short-slide-down.html',
+    visibility: 'visible',
+    site_reference: {
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: 'short-slide-down',
+      },
+      renderer: {
+        id: 'kinetic-top-build',
+        source: 'spec',
+        params: {
+          first_word_duration_ms: 360,
+          push_duration_ms: 500,
+          exit_duration_ms: 320,
+          hold_ms: 1100,
+          between_phrases_ms: 180,
+          entry_offset_y_px: -28,
+          line_gap_px: 12,
+          first_word_y_px: -14,
+          entry_scale: 0.992,
+          entry_blur_px: 2.4,
+          reflow_blur_px: 0.7,
+          exit_y_px: 10,
+          exit_blur_px: 1.2,
+          easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+          exit_easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        },
+      },
+      runtime: {
+        preset: 'website-default',
+        speed_multiplier: 0.72,
+        hold_ms: 550,
+        gap_ms: 320,
+        y_travel_multiplier: 0.58,
+        initial_delay_ms: {
+          mode: 'random-range',
+          min: 0,
+          max: 400,
+        },
+      },
+      playback: {
+        kind: 'loop',
+        cycle: ['build-phrase', 'hold', 'exit-phrase', 'gap'],
+        replacement_behavior: 'phrase-loop',
+        hold_ms: 792,
+        micro_delay_ms: 0,
+        gap_ms: 130,
+      },
+      stage: {
+        preset: 'kinetic-stack-card',
+        base_preset: 'default-title-card',
+        kinetic_container: {
+          width: 'min(92%, 270px)',
+          height_px: 132,
+          position: 'relative',
+        },
+        kinetic_word: {
+          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
+          font_weight: 580,
+          letter_spacing_em: -0.02,
+          line_height: 1.1,
+          white_space: 'nowrap',
+          absolute_centered: true,
+        },
+      },
+      reproduction_notes: [
+        'On the site this effect builds a centered vertical stack. Measure line heights, compute centered y positions for the stack, and animate existing words upward as the incoming word drops into the next line.',
+        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
+        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+      ],
+    },
   },
 } satisfies Record<string, TextAnimationSpec>;

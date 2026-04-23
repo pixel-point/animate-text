@@ -42,5 +42,7 @@
     "micro_delay_ms": 20
   },
   "usage_notes": "Use on short words or compact titles; long text reduces the center-emphasis effect.",
-  "preview": "./previews/stagger-from-center.html"
+  "preview": "./previews/stagger-from-center.html",
+  "visibility": "hidden",
+  "site_reference": null
 }

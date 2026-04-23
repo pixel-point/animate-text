@@ -25,8 +25,30 @@ if (!Array.isArray(list) || list.length < 20) {
 
 const spec = runJsonScript('get-spec.mjs', ['soft-blur-in']);
 
-if (spec.id !== 'soft-blur-in') {
+if (
+  spec.id !== 'soft-blur-in' ||
+  spec.visibility !== 'visible' ||
+  spec.site_reference?.renderer?.id !== 'generic-stagger' ||
+  spec.site_reference?.runtime?.initial_delay_ms?.max !== 400
+) {
   throw new Error('get-spec.mjs did not return the expected spec.');
+}
+
+const kineticSpec = runJsonScript('get-spec.mjs', ['kinetic-center-build']);
+
+if (
+  kineticSpec.id !== 'kinetic-center-build' ||
+  kineticSpec.site_reference?.renderer?.id !== 'kinetic-center-build' ||
+  kineticSpec.site_reference?.stage?.preset !== 'kinetic-line-card' ||
+  !Array.isArray(kineticSpec.site_reference?.reproduction_notes)
+) {
+  throw new Error('get-spec.mjs did not return the expected site-reference metadata.');
+}
+
+const hiddenSpec = runJsonScript('get-spec.mjs', ['depth-parallax-words']);
+
+if (hiddenSpec.visibility !== 'hidden' || hiddenSpec.site_reference !== null) {
+  throw new Error('get-spec.mjs did not return the expected hidden spec payload.');
 }
 
 const matches = runJsonScript('find-spec.mjs', ['typewriter']);

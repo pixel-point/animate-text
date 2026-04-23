@@ -37,12 +37,6 @@
     "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
     "exit_easing": "cubic-bezier(0.4, 0, 0.2, 1)"
   },
-  "sample": "Build from above.",
-  "phrases": [
-    ["Drop", "into", "place"],
-    ["Words", "settle", "lower"],
-    ["Build", "from", "above"]
-  ],
   "swap": {
     "mode": "sequential",
     "overlap_ms": 0,
