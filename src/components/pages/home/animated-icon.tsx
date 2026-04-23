@@ -1,48 +1,80 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const MOTION_PATH =
+  'M20 136C46.5 136 40.3691 37.002 60.2016 37.002C80.034 37.002 84.3794 107 99.249 107C114.119 107 117.5 37.002 141 37.002';
+const INITIAL_TRANSLATE = 'translate(43.33px, 82.25px)';
+const START_DELAY_MS = 780;
+const FINISH_DELAY_MS = 1600;
+
+type AnimateMotionHandle = SVGElement & {
+  beginElement?: () => void;
+};
 
 export function AnimatedIcon({ className }: { className?: string }) {
+  const [cycleKey, setCycleKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [swingKey, setSwingKey] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const animationRef = useRef<SVGAnimateMotionElement | null>(null);
+  const animationRef = useRef<AnimateMotionHandle | null>(null);
+  const startTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setIsPlaying(true);
-    }, 780);
-    
-    const timer2 = setTimeout(() => {
-      setIsAnimating(false);
-    }, 1600);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [swingKey]);
-
-  useEffect(() => {
-    if (isPlaying && animationRef.current) {
-      try {
-        animationRef.current.beginElement();
-      } catch (e) {}
+  const clearTimers = () => {
+    if (startTimerRef.current) {
+      clearTimeout(startTimerRef.current);
+      startTimerRef.current = null;
     }
-  }, [isPlaying]);
 
-  const handlePlay = () => {
-    if (isAnimating) return;
-    
+    if (finishTimerRef.current) {
+      clearTimeout(finishTimerRef.current);
+      finishTimerRef.current = null;
+    }
+  };
+
+  const startAnimationCycle = () => {
+    clearTimers();
     setIsPlaying(false);
     setIsAnimating(true);
-    setSwingKey((k) => k + 1);
+    setCycleKey((key) => key + 1);
+
+    startTimerRef.current = setTimeout(() => {
+      setIsPlaying(true);
+    }, START_DELAY_MS);
+
+    finishTimerRef.current = setTimeout(() => {
+      setIsAnimating(false);
+    }, FINISH_DELAY_MS);
+  };
+
+  useEffect(() => {
+    startAnimationCycle();
+
+    return () => {
+      clearTimers();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      return;
+    }
+
+    animationRef.current?.beginElement?.();
+  }, [isPlaying, cycleKey]);
+
+  const handlePlay = () => {
+    if (isAnimating) {
+      return;
+    }
+
+    startAnimationCycle();
   };
 
   return (
     <svg
-      key={swingKey}
+      key={cycleKey}
       viewBox="0 0 162 183"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +99,6 @@ export function AnimatedIcon({ className }: { className?: string }) {
         stroke="url(#paint1_linear_10565_72705)"
       />
 
-      {/* Background grids/lines */}
       <g clipPath="url(#background-mask)">
         <path
           d="M1 36.5H161"
@@ -131,23 +162,21 @@ export function AnimatedIcon({ className }: { className?: string }) {
         />
       </g>
 
-      {/* The main bezier path */}
       <path
-        d="M20 136C46.5 136 40.3691 37.002 60.2016 37.002C80.034 37.002 84.3794 107 99.249 107C114.119 107 117.5 37.002 141 37.002"
+        d={MOTION_PATH}
         stroke="black"
         strokeWidth="8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* The animated circles group */}
-      <g style={{ transform: isPlaying ? 'none' : 'translate(43.33px, 82.25px)' }}>
-        {isPlaying && (
+      <g style={{ transform: isPlaying ? 'none' : INITIAL_TRANSLATE }}>
+        {isPlaying ? (
           <animateMotion
-            key="animation"
+            key={cycleKey}
             ref={animationRef}
             dur="0.8s"
-            path="M20 136C46.5 136 40.3691 37.002 60.2016 37.002C80.034 37.002 84.3794 107 99.249 107C114.119 107 117.5 37.002 141 37.002"
+            path={MOTION_PATH}
             calcMode="spline"
             keyTimes="0; 0.78; 0.781; 1"
             keyPoints="0.22; 1; 0; 0.22"
@@ -155,7 +184,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
             fill="freeze"
             begin="indefinite"
           />
-        )}
+        ) : null}
         <g filter="url(#filter0_d_10565_72705)">
           <circle cx="0" cy="0" r="13" fill="white" />
         </g>
