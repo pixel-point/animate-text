@@ -16,7 +16,7 @@ const pageData = {
     title: 'Animate text skill for your AI agent.',
     description:
       'Get beautiful text animations in any stack by installing this skill to your AI agent. Use it with remotion, motion, gsap, waapi or any other libraries.',
-    imagePath: '/og.jpg',
+    imagePath: 'https://animate-text-orcin.vercel.app/og.jpg',
     pathname: '/skills/animate-text',
   },
 };
