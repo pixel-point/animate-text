@@ -16,6 +16,13 @@ export default async function RootLayout({
   return (
     <>
       <head>
+        {process.env.NODE_ENV === 'development' && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
+        )}
         <Script id="theme-color-meta-sync" strategy="beforeInteractive">
           {`
             try {

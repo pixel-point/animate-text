@@ -94,6 +94,7 @@
     "postcss-nesting": "^13.0.1",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "react-grab": "^0.1.32",
     "remark-mdx-frontmatter": "^5.2.0",
     "tailwindcss": "^4.1.7",
     "tw-animate-css": "^1.3.0",

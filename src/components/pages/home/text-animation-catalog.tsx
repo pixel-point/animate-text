@@ -11,7 +11,7 @@ import type { TextAnimationCatalogItem } from '@/data/text-animations/generated/
 
 export default function TextAnimationCatalog() {
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 [&>*]:border-border [&>*+*]:border-t xl:[&>*:nth-child(-n+2)]:border-t-0 xl:[&>*:nth-child(2n)]:border-l">
+    <div className="grid grid-cols-1 xl:grid-cols-2 [&>*]:border-border dark:[&>*]:border-border/60 [&>*+*]:border-t xl:[&>*:nth-child(-n+2)]:border-t-0 xl:[&>*:nth-child(2n)]:border-l">
       {textAnimationCatalog.map((item) => (
         <TextAnimationCard key={item.id} item={item} />
       ))}
@@ -27,22 +27,26 @@ function TextAnimationCard({ item }: { item: TextAnimationCatalogItem }) {
       className="group relative aspect-video overflow-hidden bg-background text-foreground"
       aria-label={item.spec.display_name}
     >
+      <div className="pointer-events-none absolute inset-0 z-0 bg-card/40 opacity-0 transition-opacity duration-500 ease-out group-focus-within:opacity-100 group-hover:opacity-100" />
+
       <button
         type="button"
         onClick={() => handleCopy(item.id)}
         aria-label={isCopied ? `Copied ${item.id}` : `Copy ${item.id}`}
         title={item.id}
         className={cn(
-          'absolute top-3 right-3 z-10 inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[11px] font-medium tracking-tight',
-          'border-foreground/10 bg-background/82 text-foreground/84 shadow-[0_8px_20px_rgba(0,0,0,0.08)] backdrop-blur-md',
-          'transition-all duration-200 ease-out',
+          'absolute top-3 right-3 z-10 inline-flex size-8 items-center justify-center text-foreground/50',
+          'transition-[color,transform,opacity] duration-200 ease-out hover:text-foreground',
           isCopied
             ? 'translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-1 opacity-0 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100',
         )}
       >
-        {isCopied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
-        <span>{isCopied ? 'Copied' : 'Copy'}</span>
+        {isCopied ? (
+          <CheckIcon className="size-[20px]" weight="light" />
+        ) : (
+          <CopyIcon className="size-[20px]" weight="light" />
+        )}
       </button>
 
       <TextAnimationStage item={item} />
@@ -71,7 +75,7 @@ function TextAnimationStage({ item }: { item: TextAnimationCatalogItem }) {
   }, [item]);
 
   return (
-    <div ref={stageRef} className="text-animation-stage pointer-events-none absolute inset-0">
+    <div ref={stageRef} className="text-animation-stage pointer-events-none absolute inset-0 z-[1]">
       {failed ? (
         <h3 className="text-animation-title text-animation-fallback">{item.content.sample}</h3>
       ) : null}
