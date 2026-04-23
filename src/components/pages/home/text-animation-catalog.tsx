@@ -27,13 +27,13 @@ function TextAnimationCard({ item }: { item: TextAnimationCatalogItem }) {
       className="group relative aspect-video overflow-hidden bg-background text-foreground"
       aria-label={item.spec.display_name}
     >
-      <div className="pointer-events-none absolute inset-0 z-0 bg-card/40 opacity-0 transition-opacity duration-500 ease-out group-focus-within:opacity-100 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-card/50 opacity-0 transition-opacity duration-500 ease-out group-focus-within:opacity-100 group-hover:opacity-100" />
 
       <button
         type="button"
         onClick={() => handleCopy(item.id)}
         aria-label={isCopied ? `Copied ${item.id}` : `Copy ${item.id}`}
-        title={item.id}
+        title="Copy"
         className={cn(
           'absolute top-3 right-3 z-10 inline-flex size-8 items-center justify-center text-foreground/50',
           'transition-[color,transform,opacity] duration-200 ease-out hover:text-foreground',

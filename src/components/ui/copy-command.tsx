@@ -33,6 +33,7 @@ export interface CopyCommandProps
   contentClassName?: string;
   copyButtonClassName?: string;
   copyAriaLabel?: string;
+  copyTitle?: string;
   copyIconClassName?: string;
   copyIconWeight?: CopyCommandIconWeight;
 }
@@ -49,6 +50,7 @@ function CopyCommand({
   contentClassName,
   copyButtonClassName,
   copyAriaLabel,
+  copyTitle,
   copyIconClassName,
   copyIconWeight,
   ...props
@@ -93,6 +95,7 @@ function CopyCommand({
         type="button"
         onClick={() => handleCopy(command)}
         aria-label={isCopied ? 'Copied' : (copyAriaLabel ?? 'Copy to clipboard')}
+        title={copyTitle ?? 'Copy'}
       >
         {isCopied ? (
           <CheckIcon
