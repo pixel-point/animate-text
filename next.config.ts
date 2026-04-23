@@ -6,8 +6,11 @@ import createMDX from '@next/mdx';
 const resolveLocalPlugin = (relativePath: string) =>
   fileURLToPath(new URL(relativePath, import.meta.url));
 const resolveMdxPlugin = (file: string) => resolveLocalPlugin(`./src/lib/mdx-plugins/${file}`);
+const normalizeOrigin = (value: string | undefined) => value?.replace(/\/+$/, '');
+const assetOrigin = normalizeOrigin(process.env.NEXT_PUBLIC_ASSET_ORIGIN);
 
 const nextConfig: NextConfig = {
+  assetPrefix: assetOrigin,
   experimental: {
     optimizePackageImports: ['@phosphor-icons/react', 'date-fns'],
   },

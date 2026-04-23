@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import type { Metadata } from 'next';
 
 import InstallSkillButton from '@/components/pages/home/install-skill-button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CodexSkillIcon } from '@/components/ui/codex-skill-icon';
 import { Link } from '@/components/ui/link';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
+import { getAssetUrl } from '@/lib/asset-url';
 import { getMetadata } from '@/lib/get-metadata';
 import { geistMono } from '@/lib/mono-font';
 
@@ -42,8 +42,8 @@ export default function AnimateTextSkillPage() {
                 <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight text-balance text-foreground md:text-4xl md:leading-tight lg:text-[50px] lg:leading-[1.05]">
                   Crafted{' '}
                   <span className="whitespace-nowrap">
-                    <Image
-                      src="/home-text-icon.png"
+                    <img
+                      src={getAssetUrl('/home-text-icon.png')}
                       alt=""
                       width={172}
                       height={160}
