@@ -31,9 +31,9 @@ export const metadata: Metadata = getMetadata({
 export default function AnimateTextSkillPage() {
   return (
     <main className="min-h-svh bg-background md:h-svh md:overflow-hidden">
-      <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] md:h-svh md:grid-cols-[400px_minmax(0,1fr)] lg:grid-cols-[480px_minmax(0,1fr)]">
+      <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] md:h-svh md:grid-cols-[400px_minmax(0,1fr)] lg:grid-cols-[544px_minmax(0,1fr)]">
         <aside className="border-b border-border md:sticky md:top-0 md:h-svh md:overflow-hidden md:border-r md:border-b-0 md:dark:[border-right-color:hsl(var(--border)/0.6)]">
-          <div className="flex h-full flex-col justify-between px-5 pt-16 pb-4 md:px-9 lg:px-9 lg:pt-16 lg:pb-6">
+          <div className="flex h-full flex-col justify-between px-5 pt-12 pb-4 sm:pt-8 md:px-9 md:pt-16 lg:px-9 lg:pb-6">
             <div>
               <Badge className={`${geistMono.className} mb-3 w-fit gap-[6px] font-normal lg:mb-6`}>
                 <CodexSkillIcon className="relative top-[2px] size-[18px] shrink-0" />
