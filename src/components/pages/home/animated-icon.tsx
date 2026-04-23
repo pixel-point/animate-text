@@ -13,7 +13,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
     const timer1 = setTimeout(() => {
       setIsPlaying(true);
     }, 780);
-    
+
     const timer2 = setTimeout(() => {
       setIsAnimating(false);
     }, 1600);
@@ -34,7 +34,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
 
   const handlePlay = () => {
     if (isAnimating) return;
-    
+
     setIsPlaying(false);
     setIsAnimating(true);
     setSwingKey((k) => k + 1);

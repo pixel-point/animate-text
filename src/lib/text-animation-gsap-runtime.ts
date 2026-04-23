@@ -1,3 +1,6 @@
+import { gsap } from 'gsap';
+import { CustomEase } from 'gsap/CustomEase';
+
 import { TEXT_ANIMATION_RUNTIME } from '@/data/text-animations/generated/catalog';
 import type {
   TextAnimationCatalogItem,
@@ -17,12 +20,97 @@ import {
   toAnimationFrame,
 } from '@/lib/text-animation-shared';
 
+gsap.registerPlugin(CustomEase);
+
+type GsapPlaybackControls = {
+  finished: Promise<void>;
+  kill: () => void;
+};
+
 type LoopController = {
-  animations: Set<Animation>;
+  animations: Set<GsapPlaybackControls>;
   cancelled: boolean;
   stage: HTMLElement;
   timers: Set<number>;
 };
+
+type GsapFrameValue = number | string;
+
+type GsapAnimationOptions = {
+  delay?: number;
+  duration: number;
+  easing: string;
+};
+
+const gsapEaseCache = new Map<string, string | gsap.EaseFunction>();
+
+function createGsapBezierEase(normalized: string, values: [number, number, number, number]) {
+  const name = `textAnimationBezier-${values.join('-').replaceAll('.', '_').replaceAll('-', 'n')}`;
+  const ease = CustomEase.create(
+    name,
+    `M0,0 C${values[0]},${values[1]} ${values[2]},${values[3]} 1,1`,
+  );
+
+  gsapEaseCache.set(normalized, ease);
+  return ease;
+}
+
+function resolveGsapEasing(easing: string) {
+  const normalized = easing.trim();
+  const cached = gsapEaseCache.get(normalized);
+
+  if (cached) {
+    return cached;
+  }
+
+  const bezierMatch = normalized.match(/^cubic-bezier\(([^)]+)\)$/i);
+
+  if (bezierMatch) {
+    const values = bezierMatch[1]
+      .split(',')
+      .map((value) => Number.parseFloat(value.trim()))
+      .filter((value) => Number.isFinite(value));
+
+    if (values.length === 4) {
+      return createGsapBezierEase(normalized, values as [number, number, number, number]);
+    }
+  }
+
+  const stepsMatch = normalized.match(/^steps\(\s*(\d+)\s*,\s*(start|end)\s*\)$/i);
+
+  if (stepsMatch) {
+    const stepsCount = Number.parseInt(stepsMatch[1], 10);
+    const direction = stepsMatch[2].toLowerCase();
+    const ease = direction === 'end' ? `steps(${stepsCount})` : `steps(${stepsCount}, start)`;
+
+    gsapEaseCache.set(normalized, ease);
+    return ease;
+  }
+
+  if (normalized === 'ease-in') {
+    return createGsapBezierEase(normalized, [0.42, 0, 1, 1]);
+  }
+
+  if (normalized === 'ease-out') {
+    return createGsapBezierEase(normalized, [0, 0, 0.58, 1]);
+  }
+
+  if (normalized === 'ease-in-out') {
+    return createGsapBezierEase(normalized, [0.42, 0, 0.58, 1]);
+  }
+
+  if (normalized === 'ease') {
+    return createGsapBezierEase(normalized, [0.25, 0.1, 0.25, 1]);
+  }
+
+  if (normalized === 'linear') {
+    gsapEaseCache.set(normalized, 'none');
+    return 'none';
+  }
+
+  gsapEaseCache.set(normalized, normalized);
+  return normalized;
+}
 
 function createLoopController(stage: HTMLElement): LoopController {
   return {
@@ -43,21 +131,43 @@ function cleanupLoop(controller: LoopController) {
   controller.timers.clear();
 
   controller.animations.forEach((animation) => {
-    animation.cancel();
+    animation.kill();
   });
 
   controller.animations.clear();
   clearStage(controller.stage);
 }
 
-function registerAnimation(controller: LoopController, animation: Animation): Animation {
-  controller.animations.add(animation);
+function registerAnimation(
+  controller: LoopController,
+  animation: gsap.core.Animation,
+): GsapPlaybackControls {
+  let resolveFinished: () => void = () => {};
+  const control: GsapPlaybackControls = {
+    finished: new Promise<void>((resolve) => {
+      resolveFinished = resolve;
+    }),
+    kill: () => {
+      animation.kill();
+      controller.animations.delete(control);
+      resolveFinished();
+    },
+  };
 
-  void animation.finished.finally(() => {
-    controller.animations.delete(animation);
+  const complete = () => {
+    controller.animations.delete(control);
+    resolveFinished();
+  };
+
+  animation.eventCallback('onComplete', complete);
+  animation.eventCallback('onInterrupt', complete);
+  controller.animations.add(control);
+
+  control.finished.catch(() => {
+    controller.animations.delete(control);
   });
 
-  return animation;
+  return control;
 }
 
 function schedule(controller: LoopController, callback: () => void, delay: number) {
@@ -86,7 +196,7 @@ function sleep(controller: LoopController, delay: number): Promise<void> {
   });
 }
 
-function waitForAnimations(animations: Animation[]) {
+function waitForAnimations(animations: GsapPlaybackControls[]) {
   return Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
 }
 
@@ -94,6 +204,121 @@ function clearStage(stage: HTMLElement) {
   while (stage.firstChild) {
     stage.removeChild(stage.firstChild);
   }
+}
+
+function getFrameValue(frame: Keyframe, key: string): GsapFrameValue | undefined {
+  const value = (frame as Record<string, unknown>)[key];
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    return value;
+  }
+
+  return undefined;
+}
+
+function getFrameOffsets(frames: Keyframe[]) {
+  const hasExplicitOffsets = frames.some((frame) => typeof frame.offset === 'number');
+
+  return hasExplicitOffsets
+    ? frames.map((frame, index) => {
+        if (typeof frame.offset === 'number') {
+          return frame.offset;
+        }
+
+        if (index === 0) {
+          return 0;
+        }
+
+        if (index === frames.length - 1) {
+          return 1;
+        }
+
+        return index / (frames.length - 1);
+      })
+    : frames.map((_, index) => (frames.length === 1 ? 1 : index / (frames.length - 1)));
+}
+
+function createGsapFrame(frame: Keyframe) {
+  const vars: Record<string, GsapFrameValue> = {};
+
+  Object.entries(frame as Record<string, unknown>).forEach(([key, value]) => {
+    if (key !== 'offset' && (typeof value === 'number' || typeof value === 'string')) {
+      vars[key] = value;
+    }
+  });
+
+  return vars;
+}
+
+function createGsapKeyframes(frames: Keyframe[]) {
+  const keys = new Set<string>();
+
+  frames.forEach((frame) => {
+    Object.entries(frame as Record<string, unknown>).forEach(([key, value]) => {
+      if (key !== 'offset' && (typeof value === 'number' || typeof value === 'string')) {
+        keys.add(key);
+      }
+    });
+  });
+
+  const normalizedFrames = frames.map((frame) => createGsapFrame(frame));
+
+  keys.forEach((key) => {
+    const fallback = frames
+      .map((frame) => getFrameValue(frame, key))
+      .find((value): value is GsapFrameValue => value !== undefined);
+
+    if (fallback === undefined) {
+      return;
+    }
+
+    let currentValue = fallback;
+    frames.forEach((frame, index) => {
+      const nextValue = getFrameValue(frame, key);
+
+      if (nextValue !== undefined) {
+        currentValue = nextValue;
+      }
+
+      normalizedFrames[index][key] = currentValue;
+    });
+  });
+
+  return normalizedFrames;
+}
+
+function startAnimation(
+  controller: LoopController,
+  element: Element,
+  frames: Keyframe[],
+  { delay = 0, duration, easing }: GsapAnimationOptions,
+) {
+  const keyframes = createGsapKeyframes(frames);
+  const offsets = getFrameOffsets(frames);
+  const ease = resolveGsapEasing(easing);
+
+  gsap.set(element, keyframes[0]);
+
+  const tweenKeyframes = keyframes.slice(1).map((frame, index) => {
+    const previousOffset = offsets[index] ?? 0;
+    const nextOffset = offsets[index + 1] ?? 1;
+    const segmentDuration = Math.max(0, ((nextOffset - previousOffset) * duration) / 1000);
+
+    return {
+      ...frame,
+      duration: segmentDuration,
+    };
+  });
+
+  return registerAnimation(
+    controller,
+    gsap.to(element, {
+      keyframes: tweenKeyframes,
+      delay: delay / 1000,
+      duration: duration / 1000,
+      ease,
+    }),
+  );
 }
 
 function applyPhaseStart(
@@ -155,15 +380,11 @@ function animatePhase(
       spec.target ?? 'per-character',
     );
 
-    registerAnimation(
-      controller,
-      unit.animate([fromKeyframe, toKeyframe], {
-        delay: ranks[index] * delayStep,
-        duration,
-        easing: currentPhase.easing,
-        fill: 'forwards',
-      }),
-    );
+    startAnimation(controller, unit, [fromKeyframe, toKeyframe], {
+      delay: ranks[index] * delayStep,
+      duration,
+      easing: currentPhase.easing,
+    });
   });
 
   return duration + Math.max(0, units.length - 1) * delayStep;
@@ -270,23 +491,20 @@ async function runSharedSlideOpacityLoop(
     stage.appendChild(title);
 
     const animations = [
-      registerAnimation(
-        controller,
-        title.animate([fromFrame, toFrame], {
-          duration: titleDuration,
-          easing: enter.easing,
-          fill: 'forwards',
-        }),
-      ),
+      startAnimation(controller, title, [fromFrame, toFrame], {
+        duration: titleDuration,
+        easing: enter.easing,
+      }),
       ...units.map((unit, index) =>
-        registerAnimation(
+        startAnimation(
           controller,
-          unit.animate([{ opacity: wordOpacityFrom }, { opacity: wordOpacityTo }], {
+          unit,
+          [{ opacity: wordOpacityFrom }, { opacity: wordOpacityTo }],
+          {
             delay: index * wordStaggerMs,
             duration: wordOpacityDuration,
             easing: enter.easing,
-            fill: 'forwards',
-          }),
+          },
         ),
       ),
     ];
@@ -312,14 +530,10 @@ async function runSharedSlideOpacityLoop(
     Object.assign(title.style, fromFrame);
 
     await waitForAnimations([
-      registerAnimation(
-        controller,
-        title.animate([fromFrame, toFrame], {
-          duration: exitDuration,
-          easing: exit.easing,
-          fill: 'forwards',
-        }),
-      ),
+      startAnimation(controller, title, [fromFrame, toFrame], {
+        duration: exitDuration,
+        easing: exit.easing,
+      }),
     ]);
 
     clearStage(stage);
@@ -416,29 +630,27 @@ async function runKineticCenterBuildLoop(
 
       const widths = Array.from(line.children, (node) => (node as HTMLElement).offsetWidth);
       const nextPositions = computePositions(widths);
-      const animations: Animation[] = [];
+      const animations: GsapPlaybackControls[] = [];
 
       if (index === 0) {
         const startFrame = buildKineticFrame(0, firstWordLiftPx, entryScale, entryBlurPx, 0);
         setKineticPose(word, startFrame);
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                startFrame,
-                {
-                  ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
-                  offset: 0.58,
-                },
-                buildKineticFrame(0, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              startFrame,
               {
-                duration: firstWordDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
+                offset: 0.58,
               },
-            ),
+              buildKineticFrame(0, 0, 1, 0, 1),
+            ],
+            {
+              duration: firstWordDuration,
+              easing,
+            },
           ),
         );
       } else {
@@ -447,23 +659,21 @@ async function runKineticCenterBuildLoop(
           const nextX = nextPositions[wordIndex];
 
           animations.push(
-            registerAnimation(
+            startAnimation(
               controller,
-              currentWord.animate(
-                [
-                  buildKineticFrame(currentX, 0, 1, 0, 1),
-                  {
-                    ...buildKineticFrame(mix(currentX, nextX, 0.58), 0, 1, reflowBlurPx, 1),
-                    offset: 0.52,
-                  },
-                  buildKineticFrame(nextX, 0, 1, 0, 1),
-                ],
+              currentWord,
+              [
+                buildKineticFrame(currentX, 0, 1, 0, 1),
                 {
-                  duration: pushDuration,
-                  easing,
-                  fill: 'forwards',
+                  ...buildKineticFrame(mix(currentX, nextX, 0.58), 0, 1, reflowBlurPx, 1),
+                  offset: 0.52,
                 },
-              ),
+                buildKineticFrame(nextX, 0, 1, 0, 1),
+              ],
+              {
+                duration: pushDuration,
+                easing,
+              },
             ),
           );
         });
@@ -472,29 +682,27 @@ async function runKineticCenterBuildLoop(
         const startX = targetX + entryOffsetPx;
         setKineticPose(word, buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0));
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0),
-                {
-                  ...buildKineticFrame(
-                    mix(startX, targetX, 0.72),
-                    0,
-                    0.998,
-                    entryBlurPx * 0.38,
-                    0.84,
-                  ),
-                  offset: 0.6,
-                },
-                buildKineticFrame(targetX, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0),
               {
-                duration: pushDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(
+                  mix(startX, targetX, 0.72),
+                  0,
+                  0.998,
+                  entryBlurPx * 0.38,
+                  0.84,
+                ),
+                offset: 0.6,
               },
-            ),
+              buildKineticFrame(targetX, 0, 1, 0, 1),
+            ],
+            {
+              duration: pushDuration,
+              easing,
+            },
           ),
         );
       }
@@ -522,23 +730,21 @@ async function runKineticCenterBuildLoop(
     const animations = words.map((word, index) => {
       const position = positions[index];
 
-      return registerAnimation(
+      return startAnimation(
         controller,
-        word.animate(
-          [
-            buildKineticFrame(position, 0, 1, 0, 1),
-            {
-              ...buildKineticFrame(position, exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
-              offset: 0.52,
-            },
-            buildKineticFrame(position, exitLiftPx, 1, exitBlurPx, 0),
-          ],
+        word,
+        [
+          buildKineticFrame(position, 0, 1, 0, 1),
           {
-            duration: exitDuration,
-            easing: exitEasing,
-            fill: 'forwards',
+            ...buildKineticFrame(position, exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
+            offset: 0.52,
           },
-        ),
+          buildKineticFrame(position, exitLiftPx, 1, exitBlurPx, 0),
+        ],
+        {
+          duration: exitDuration,
+          easing: exitEasing,
+        },
       );
     });
 
@@ -638,29 +844,27 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
 
       const heights = Array.from(line.children, (node) => (node as HTMLElement).offsetHeight);
       const nextPositions = computePositions(heights);
-      const animations: Animation[] = [];
+      const animations: GsapPlaybackControls[] = [];
 
       if (index === 0) {
         const startFrame = buildKineticFrame(0, firstWordLiftPx, entryScale, entryBlurPx, 0);
         setKineticPose(word, startFrame);
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                startFrame,
-                {
-                  ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
-                  offset: 0.58,
-                },
-                buildKineticFrame(0, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              startFrame,
               {
-                duration: firstWordDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
+                offset: 0.58,
               },
-            ),
+              buildKineticFrame(0, 0, 1, 0, 1),
+            ],
+            {
+              duration: firstWordDuration,
+              easing,
+            },
           ),
         );
       } else {
@@ -669,23 +873,21 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
           const nextY = nextPositions[wordIndex];
 
           animations.push(
-            registerAnimation(
+            startAnimation(
               controller,
-              currentWord.animate(
-                [
-                  buildKineticFrame(0, currentY, 1, 0, 1),
-                  {
-                    ...buildKineticFrame(0, mix(currentY, nextY, 0.58), 1, reflowBlurPx, 1),
-                    offset: 0.52,
-                  },
-                  buildKineticFrame(0, nextY, 1, 0, 1),
-                ],
+              currentWord,
+              [
+                buildKineticFrame(0, currentY, 1, 0, 1),
                 {
-                  duration: pushDuration,
-                  easing,
-                  fill: 'forwards',
+                  ...buildKineticFrame(0, mix(currentY, nextY, 0.58), 1, reflowBlurPx, 1),
+                  offset: 0.52,
                 },
-              ),
+                buildKineticFrame(0, nextY, 1, 0, 1),
+              ],
+              {
+                duration: pushDuration,
+                easing,
+              },
             ),
           );
         });
@@ -696,29 +898,27 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
           buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
         );
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
-                {
-                  ...buildKineticFrame(
-                    0,
-                    mix(targetY + entryOffsetYPx, targetY, 0.72),
-                    0.998,
-                    entryBlurPx * 0.38,
-                    0.84,
-                  ),
-                  offset: 0.6,
-                },
-                buildKineticFrame(0, targetY, 1, 0, 1),
-              ],
+            word,
+            [
+              buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
               {
-                duration: pushDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(
+                  0,
+                  mix(targetY + entryOffsetYPx, targetY, 0.72),
+                  0.998,
+                  entryBlurPx * 0.38,
+                  0.84,
+                ),
+                offset: 0.6,
               },
-            ),
+              buildKineticFrame(0, targetY, 1, 0, 1),
+            ],
+            {
+              duration: pushDuration,
+              easing,
+            },
           ),
         );
       }
@@ -746,23 +946,21 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
     const animations = words.map((word, index) => {
       const position = positions[index];
 
-      return registerAnimation(
+      return startAnimation(
         controller,
-        word.animate(
-          [
-            buildKineticFrame(0, position, 1, 0, 1),
-            {
-              ...buildKineticFrame(0, position + exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
-              offset: 0.52,
-            },
-            buildKineticFrame(0, position + exitLiftPx, 1, exitBlurPx, 0),
-          ],
+        word,
+        [
+          buildKineticFrame(0, position, 1, 0, 1),
           {
-            duration: exitDuration,
-            easing: exitEasing,
-            fill: 'forwards',
+            ...buildKineticFrame(0, position + exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
+            offset: 0.52,
           },
-        ),
+          buildKineticFrame(0, position + exitLiftPx, 1, exitBlurPx, 0),
+        ],
+        {
+          duration: exitDuration,
+          easing: exitEasing,
+        },
       );
     });
 
@@ -804,7 +1002,7 @@ function resolveRenderer(
   return undefined;
 }
 
-export function startTextAnimationLoop(
+export function startTextAnimationGsapLoop(
   stage: HTMLElement,
   item: TextAnimationCatalogItem,
   onError?: (error: unknown) => void,

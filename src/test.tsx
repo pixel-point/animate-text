@@ -14,10 +14,10 @@ export function AnimatedIcon({ className }: { className?: string }) {
 
   const handlePlay = () => {
     if (!isPlaying) return;
-    
+
     setIsPlaying(false);
     setSwingKey((k) => k + 1);
-    
+
     setTimeout(() => {
       setIsPlaying(true);
     }, 780);
@@ -43,9 +43,11 @@ export function AnimatedIcon({ className }: { className?: string }) {
           <animateMotion
             key="animation"
             ref={(el) => {
-              if (el) {
+              const animation = el as (SVGElement & { beginElement?: () => void }) | null;
+
+              if (animation) {
                 try {
-                  el.beginElement();
+                  animation.beginElement?.();
                 } catch (e) {
                   console.error(e);
                 }
@@ -67,5 +69,9 @@ export function AnimatedIcon({ className }: { className?: string }) {
   );
 }
 
-const root = createRoot(document.getElementById('root'));
-root.render(<AnimatedIcon />);
+const rootContainer = document.getElementById('root');
+
+if (rootContainer) {
+  const root = createRoot(rootContainer);
+  root.render(<AnimatedIcon />);
+}

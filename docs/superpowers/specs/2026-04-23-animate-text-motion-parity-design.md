@@ -12,7 +12,7 @@ The goal is strict visual parity, not a stylistic reinterpretation. The Motion r
 ## Context
 
 - The current public page at [src/app/(website)/skills/animate-text/page.tsx](</Users/alex/Projects/animate-text/src/app/(website)/skills/animate-text/page.tsx>) renders the split-screen shell and the animation catalog.
-- The current catalog stage at [src/components/pages/home/text-animation-catalog.tsx](</Users/alex/Projects/animate-text/src/components/pages/home/text-animation-catalog.tsx>) starts a WAAPI-based loop through [src/lib/text-animation-runtime.ts](</Users/alex/Projects/animate-text/src/lib/text-animation-runtime.ts>).
+- The current catalog stage at [src/components/pages/home/text-animation-catalog.tsx](/Users/alex/Projects/animate-text/src/components/pages/home/text-animation-catalog.tsx) starts a WAAPI-based loop through [src/lib/text-animation-runtime.ts](/Users/alex/Projects/animate-text/src/lib/text-animation-runtime.ts).
 - The canonical motion contracts live in the generated catalog/spec data and in the bundled `site_reference` blocks for the visible website versions.
 - The project already depends on `motion`, so the new work is an engine migration for a cloned route rather than a dependency introduction.
 
@@ -135,7 +135,7 @@ Motion's imperative APIs are acceptable for these cases because the user require
 
 ## Styling And Markup Parity
 
-The Motion route should preserve the current stage and typography classes from [src/styles/text-animations.css](</Users/alex/Projects/animate-text/src/styles/text-animations.css>) wherever possible:
+The Motion route should preserve the current stage and typography classes from [src/styles/text-animations.css](/Users/alex/Projects/animate-text/src/styles/text-animations.css) wherever possible:
 
 - `.text-animation-stage`
 - `.text-animation-title`
