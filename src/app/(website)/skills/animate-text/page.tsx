@@ -33,7 +33,7 @@ export default function AnimateTextSkillPage() {
     <main className="min-h-svh bg-background md:h-svh md:overflow-hidden">
       <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] md:h-svh md:grid-cols-[400px_minmax(0,1fr)] lg:grid-cols-[480px_minmax(0,1fr)]">
         <aside className="border-b border-border md:sticky md:top-0 md:h-svh md:overflow-hidden md:border-r md:border-b-0 md:dark:[border-right-color:hsl(var(--border)/0.6)]">
-          <div className="flex h-full flex-col justify-between px-5 pt-6 pb-4 md:px-9 lg:px-9 lg:pt-8 lg:pb-6">
+          <div className="flex h-full flex-col justify-between px-5 pt-16 pb-4 md:px-9 lg:px-9 lg:pt-16 lg:pb-6">
             <div>
               <Badge className={`${geistMono.className} mb-3 w-fit gap-[6px] font-normal lg:mb-6`}>
                 <CodexSkillIcon className="relative top-[2px] size-[18px] shrink-0" />
@@ -41,7 +41,7 @@ export default function AnimateTextSkillPage() {
               </Badge>
 
               <div>
-                <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight text-balance text-foreground md:text-4xl md:leading-tight lg:text-[50px] lg:leading-[1.05]">
+                <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight text-foreground sm:text-balance md:text-4xl md:leading-tight lg:text-[48px] lg:leading-[1.05]">
                   Crafted{' '}
                   <span className="sm:whitespace-nowrap">
                     <AnimatedIcon className="relative top-[4px] mr-[10px] ml-[2px] inline-block h-[42.4px] w-auto shrink-0 -rotate-[4deg] align-[-0.16em] md:h-[1.28em] lg:ml-0 lg:h-[66px]" />
