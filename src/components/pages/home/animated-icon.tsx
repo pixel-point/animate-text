@@ -1,29 +1,43 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export function AnimatedIcon({ className }: { className?: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [swingKey, setSwingKey] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  const animationRef = useRef<SVGAnimateMotionElement | null>(null);
 
   useEffect(() => {
-    // Add a slight delay for initial load animation
-    const timer = setTimeout(() => {
+    const timer1 = setTimeout(() => {
       setIsPlaying(true);
     }, 780);
-    return () => clearTimeout(timer);
-  }, []);
+    
+    const timer2 = setTimeout(() => {
+      setIsAnimating(false);
+    }, 1600);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [swingKey]);
+
+  useEffect(() => {
+    if (isPlaying && animationRef.current) {
+      try {
+        animationRef.current.beginElement();
+      } catch (e) {}
+    }
+  }, [isPlaying]);
 
   const handlePlay = () => {
-    // Prevent multiple clicks while animating
-    if (!isPlaying) return;
+    if (isAnimating) return;
     
     setIsPlaying(false);
+    setIsAnimating(true);
     setSwingKey((k) => k + 1);
-    
-    setTimeout(() => {
-      setIsPlaying(true);
-    }, 780);
   };
 
   return (
@@ -54,66 +68,68 @@ export function AnimatedIcon({ className }: { className?: string }) {
       />
 
       {/* Background grids/lines */}
-      <path
-        d="M1 36.5H161"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M1 106.5H161"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M60 1L60 182"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="4 4"
-      />
-      <path
-        d="M20 1L20 182"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="4 4"
-      />
-      <path
-        d="M100 1L100 182"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="4 4"
-      />
-      <path
-        d="M141 1L141 182"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="4 4"
-      />
-      <path
-        d="M1 136.5H161"
-        stroke="black"
-        strokeOpacity="0.1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <g clipPath="url(#background-mask)">
+        <path
+          d="M1 36.5H161"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M1 106.5H161"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M60 1L60 182"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="4 4"
+        />
+        <path
+          d="M20 1L20 182"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="4 4"
+        />
+        <path
+          d="M100 1L100 182"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="4 4"
+        />
+        <path
+          d="M141 1L141 182"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="4 4"
+        />
+        <path
+          d="M1 136.5H161"
+          stroke="black"
+          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
 
       {/* The main bezier path */}
       <path
@@ -129,13 +145,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
         {isPlaying && (
           <animateMotion
             key="animation"
-            ref={(el) => {
-              if (el) {
-                try {
-                  el.beginElement();
-                } catch (e) {}
-              }
-            }}
+            ref={animationRef}
             dur="0.8s"
             path="M20 136C46.5 136 40.3691 37.002 60.2016 37.002C80.034 37.002 84.3794 107 99.249 107C114.119 107 117.5 37.002 141 37.002"
             calcMode="spline"
@@ -153,6 +163,9 @@ export function AnimatedIcon({ className }: { className?: string }) {
       </g>
 
       <defs>
+        <clipPath id="background-mask">
+          <rect x="1.5" y="10.5" width="159" height="159" rx="47.5" />
+        </clipPath>
         <filter
           id="filter0_d_10565_72705"
           x="-28"
