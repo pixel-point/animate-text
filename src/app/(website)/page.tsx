@@ -56,14 +56,13 @@ export default function HomePage() {
 
                 <div className="mt-[28px] flex flex-col gap-4 text-base leading-snug tracking-tight text-muted-foreground md:text-lg md:leading-snug">
                   <p>
-                    Set of text animation skills with precise specs for polished results, fast.
-                    Every skill defines the small things that matter: pace, curves, transitions, and
-                    visual finish.
+                    Beautiful text animations, ready for any stack. Add this skill to your AI agent
+                    and use it with remotion, motion, gsap, waapi, or any other animation library.
                   </p>
 
                   <p>
-                    Pair them with `remotion-skill` for programmatic videos, or use them as
-                    animation building blocks for your site.
+                    The skill gives your agent clear animation specs, including pacing, curves,
+                    transitions, and styling details that usually get lost in vague prompts.
                   </p>
                 </div>
 

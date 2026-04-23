@@ -2,7 +2,7 @@ import { CopyCommand } from '@/components/ui/copy-command';
 import { geistMono } from '@/lib/mono-font';
 import { cn } from '@/lib/utils';
 
-const installCommand = 'npx skills add <owner>/<repo> --skill animate-text';
+const installCommand = 'npx skills add pixel-point/animate-text --skill animate-text';
 
 export default function InstallSkillButton() {
   return (
