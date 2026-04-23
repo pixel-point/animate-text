@@ -13,7 +13,7 @@ interface IThemeSwitcherProps {
 }
 
 const themeSwitcherVariants = cva(
-  'inline-flex items-center justify-center rounded-full border border-foreground/20 bg-transparent text-muted-foreground transition-colors duration-300 hover:border-foreground/40 hover:text-foreground/80 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:outline-hidden',
+  'inline-flex items-center justify-center rounded-full border border-foreground/20 bg-transparent text-muted-foreground transition-colors duration-300 hover:border-foreground/40 hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:outline-hidden',
   {
     variants: {
       size: {
