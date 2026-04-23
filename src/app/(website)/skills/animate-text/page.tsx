@@ -11,12 +11,12 @@ import { getMetadata } from '@/lib/get-metadata';
 import { geistMono } from '@/lib/mono-font';
 
 const pageData = {
-  pathname: '/',
+  pathname: '/skills/animate-text',
   metadata: {
     title: 'Animate text skill for your AI agent.',
     description:
       'Get beautiful text animations in any stack by installing this skill to your AI agent. Use it with remotion, motion, gsap, waapi or any other libraries.',
-    pathname: '/',
+    pathname: '/skills/animate-text',
   },
 };
 
@@ -26,7 +26,7 @@ export const metadata: Metadata = getMetadata({
   pathname: pageData.pathname,
 });
 
-export default function HomePage() {
+export default function AnimateTextSkillPage() {
   return (
     <main className="min-h-svh bg-background md:h-svh md:overflow-hidden">
       <div className="grid min-h-svh md:h-svh md:grid-cols-[400px_minmax(0,1fr)] lg:grid-cols-[480px_minmax(0,1fr)]">
