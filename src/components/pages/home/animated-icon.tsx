@@ -125,7 +125,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
       />
 
       {/* The animated circles group */}
-      <g style={{ transform: isPlaying ? 'none' : 'translate(42px, 83px)' }}>
+      <g style={{ transform: isPlaying ? 'none' : 'translate(43.33px, 82.25px)' }}>
         {isPlaying && (
           <animateMotion
             key="animation"
