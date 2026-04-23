@@ -10,7 +10,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
     // Add a slight delay for initial load animation
     const timer = setTimeout(() => {
       setIsPlaying(true);
-    }, 900);
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -23,7 +23,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
     
     setTimeout(() => {
       setIsPlaying(true);
-    }, 900);
+    }, 800);
   };
 
   return (
@@ -136,7 +136,7 @@ export function AnimatedIcon({ className }: { className?: string }) {
                 } catch (e) {}
               }
             }}
-            dur="1s"
+            dur="0.8s"
             path="M20 136C46.5 136 40.3691 37.002 60.2016 37.002C80.034 37.002 84.3794 107 99.249 107C114.119 107 117.5 37.002 141 37.002"
             calcMode="spline"
             keyTimes="0; 0.78; 0.781; 1"
