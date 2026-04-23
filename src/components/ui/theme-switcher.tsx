@@ -47,9 +47,9 @@ export function ThemeSwitcher({ className, size = 'default' }: IThemeSwitcherPro
       title={label}
     >
       {isDark ? (
-        <SunIcon className="shrink-0" size={16} />
+        <SunIcon className="shrink-0" size={18} />
       ) : (
-        <MoonIcon className="shrink-0" size={16} />
+        <MoonIcon className="shrink-0" size={18} />
       )}
       <span className="sr-only">{label}</span>
     </button>
