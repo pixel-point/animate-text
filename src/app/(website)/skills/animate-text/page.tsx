@@ -35,7 +35,7 @@ export default function AnimateTextSkillPage() {
         <aside className="border-b border-border md:sticky md:top-0 md:h-svh md:overflow-hidden md:border-r md:border-b-0 md:dark:[border-right-color:hsl(var(--border)/0.6)]">
           <div className="flex h-full flex-col justify-between px-5 pt-12 pb-4 sm:pt-8 md:px-9 md:pt-16 lg:px-9 lg:pb-6">
             <div>
-              <Badge className={`${geistMono.className} mb-3 w-fit gap-[6px] font-normal lg:mb-6`}>
+              <Badge className={`${geistMono.className} mb-3 w-fit gap-[6px] font-normal lg:mb-9`}>
                 <CodexSkillIcon className="relative top-[2px] size-[18px] shrink-0" />
                 <span className="relative top-px">SKILLS.md</span>
               </Badge>
@@ -50,7 +50,7 @@ export default function AnimateTextSkillPage() {
                   animations for AI workflows
                 </h1>
 
-                <div className="mt-[28px] flex flex-col gap-4 text-base leading-snug tracking-tight text-muted-foreground md:text-lg md:leading-snug">
+                <div className="mt-[28px] flex flex-col gap-4 text-base leading-snug tracking-tight text-muted-foreground md:text-lg md:leading-snug lg:mt-[42px] lg:gap-[28px]">
                   <p>
                     Beautiful text animations, ready for any stack. Add this skill to your AI agent
                     and use it with remotion, motion, gsap, waapi, or any other animation library.
