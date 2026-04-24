@@ -7,7 +7,7 @@ const installCommand = 'npx skills add pixel-point/animate-text --skill animate-
 export default function InstallSkillButton() {
   return (
     <CopyCommand
-      className="mt-11 h-[52px] w-full gap-1 !rounded-2xl border-foreground/4 bg-foreground/8 pr-1 pl-3 text-foreground lg:h-[52px]"
+      className="mt-11 h-[52px] w-full gap-1 !rounded-2xl border-foreground/4 bg-foreground/8 pr-1 pl-3 text-foreground lg:mt-[66px] lg:h-[52px]"
       contentClassName={cn(geistMono.className, 'pr-4')}
       copyAriaLabel="Copy install command"
       copyTitle="Copy"
