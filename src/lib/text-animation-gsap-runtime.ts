@@ -315,8 +315,10 @@ function startAnimation(
     gsap.to(element, {
       keyframes: tweenKeyframes,
       delay: delay / 1000,
-      duration: duration / 1000,
+      // Segment durations already sum to the requested total; adding a top-level
+      // duration makes GSAP retime the keyframes and drifts from WAAPI/Motion.
       ease,
+      overwrite: 'auto',
     }),
   );
 }
@@ -481,33 +483,36 @@ async function runSharedSlideOpacityLoop(
 
     Object.assign(title.style, fromFrame);
     title.style.willChange = 'transform, opacity, filter';
+    gsap.set(units, { opacity: wordOpacityFrom });
 
     units.forEach((unit) => {
-      unit.style.opacity = `${wordOpacityFrom}`;
       unit.style.willChange = 'opacity';
     });
 
     clearStage(stage);
     stage.appendChild(title);
 
-    const animations = [
+    const animations: GsapPlaybackControls[] = [
       startAnimation(controller, title, [fromFrame, toFrame], {
         duration: titleDuration,
         easing: enter.easing,
       }),
-      ...units.map((unit, index) =>
-        startAnimation(
-          controller,
-          unit,
-          [{ opacity: wordOpacityFrom }, { opacity: wordOpacityTo }],
-          {
-            delay: index * wordStaggerMs,
-            duration: wordOpacityDuration,
-            easing: enter.easing,
-          },
-        ),
-      ),
     ];
+
+    if (units.length > 0) {
+      animations.push(
+        registerAnimation(
+          controller,
+          gsap.to(units, {
+            opacity: wordOpacityTo,
+            duration: wordOpacityDuration / 1000,
+            ease: resolveGsapEasing(enter.easing),
+            stagger: wordStaggerMs / 1000,
+            overwrite: 'auto',
+          }),
+        ),
+      );
+    }
 
     await waitForAnimations(animations);
 

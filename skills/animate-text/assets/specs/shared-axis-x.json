@@ -40,8 +40,5 @@
     "overlap_ms": 120,
     "micro_delay_ms": 20
   },
-  "usage_notes": "Use when moving between same-level views where horizontal direction conveys progress.",
-  "preview": "./previews/shared-axis-x.html",
-  "visibility": "hidden",
-  "site_reference": null
+  "usage_notes": "Use when moving between same-level views where horizontal direction conveys progress."
 }

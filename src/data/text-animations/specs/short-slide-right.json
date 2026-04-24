@@ -10,15 +10,31 @@
     "duration_ms": 520,
     "stagger_ms": 92,
     "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-    "from": { "opacity": 1, "x_px": -24, "blur_px": 1.2 },
-    "to": { "opacity": 1, "x_px": 0, "blur_px": 0 }
+    "from": {
+      "opacity": 1,
+      "x_px": -24,
+      "blur_px": 1.2
+    },
+    "to": {
+      "opacity": 1,
+      "x_px": 0,
+      "blur_px": 0
+    }
   },
   "exit": {
     "duration_ms": 320,
     "stagger_ms": 0,
     "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
-    "from": { "opacity": 1, "x_px": 0, "blur_px": 0 },
-    "to": { "opacity": 0, "x_px": 12, "blur_px": 1 }
+    "from": {
+      "opacity": 1,
+      "x_px": 0,
+      "blur_px": 0
+    },
+    "to": {
+      "opacity": 0,
+      "x_px": 12,
+      "blur_px": 1
+    }
   },
   "build": {
     "word_opacity_duration_ms": 210,
@@ -48,6 +64,5 @@
       }
     }
   },
-  "usage_notes": "Best on three-word headings where word order matters. Keep the horizontal travel compact and shared; the phrase should read as one move, with staging communicated only by opacity. For longer phrases, reduce stagger_ms or shorten the opacity duration so the cascade does not drag.",
-  "preview": "./previews/short-slide-right.html"
+  "usage_notes": "Best on three-word headings where word order matters. Keep the horizontal travel compact and shared; the phrase should read as one move, with staging communicated only by opacity. For longer phrases, reduce stagger_ms or shorten the opacity duration so the cascade does not drag."
 }

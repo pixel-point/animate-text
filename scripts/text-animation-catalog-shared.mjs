@@ -34,7 +34,6 @@ const allowedTopLevelSpecKeys = new Set([
   'exit',
   'swap',
   'usage_notes',
-  'preview',
   'custom_renderer',
   'stagger_mode',
   'build',
@@ -205,72 +204,620 @@ function createRuntimePresets(runtime) {
 
 function createStagePresets() {
   return {
-    'default-title-card': {
+    'default-text-host': {
+      purpose:
+        'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
       container: {
-        container_type: 'inline-size',
-        padding: 'clamp(1rem, 5cqi, 1.5rem)',
+        requirement: 'Provide a host element for the animated title.',
         perspective_px: 900,
+        perspective_note:
+          'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
       },
       title: {
-        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-        font_weight: 580,
-        letter_spacing_em: -0.022,
-        line_height: 1.08,
-        max_width: 'min(92%, 18ch)',
-        text_align: 'center',
-        text_wrap: 'balance',
+        requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+        display: 'inline-block',
+        transform_style: 'preserve-3d',
+        layout_note:
+          'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
       },
       unit: {
+        backface_visibility: 'hidden',
         display: 'inline-block',
+        line_display: 'block',
         transform_origin: '50% 55%',
         white_space: 'pre',
+        will_change: ['transform', 'opacity', 'filter'],
       },
     },
-    'kinetic-line-card': {
-      base_preset: 'default-title-card',
+    'kinetic-line-host': {
+      base_preset: 'default-text-host',
       kinetic_container: {
-        width: 'min(92%, 270px)',
-        height_px: 72,
+        requirement:
+          'Use a relative-positioned inline host large enough for the phrase; exact dimensions belong to the consuming UI.',
         position: 'relative',
+        coordinate_origin: 'center',
       },
       kinetic_word: {
-        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-        font_weight: 580,
-        letter_spacing_em: -0.02,
-        line_height: 1.1,
+        backface_visibility: 'hidden',
+        left: '50%',
+        position: 'absolute',
+        top: '50%',
         white_space: 'nowrap',
         absolute_centered: true,
+        will_change: ['transform', 'opacity', 'filter'],
       },
     },
-    'kinetic-stack-card': {
-      base_preset: 'default-title-card',
+    'kinetic-stack-host': {
+      base_preset: 'default-text-host',
       kinetic_container: {
-        width: 'min(92%, 270px)',
-        height_px: 132,
+        requirement:
+          'Use a relative-positioned block host large enough for the stack; exact dimensions belong to the consuming UI.',
         position: 'relative',
+        coordinate_origin: 'center',
       },
       kinetic_word: {
-        font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-        font_weight: 580,
-        letter_spacing_em: -0.02,
-        line_height: 1.1,
+        backface_visibility: 'hidden',
+        left: '50%',
+        position: 'absolute',
+        top: '50%',
         white_space: 'nowrap',
         absolute_centered: true,
+        will_change: ['transform', 'opacity', 'filter'],
       },
     },
   };
 }
 
+function createRendererRecipes() {
+  return {
+    'generic-stagger': {
+      id: 'generic-stagger',
+      summary:
+        'Split text by target, animate each animated unit from enter.from to enter.to, hold, animate current units from exit.from to exit.to, then replace content.',
+      required_dom: [
+        'one h3.text-animation-title per phrase',
+        'one span.text-animation-unit per split part',
+        'animate only non-space parts for per-word targets',
+        'span.text-animation-unit.line uses display:block for per-line targets',
+      ],
+      split_rules: {
+        whole: 'single animated unit containing the full text',
+        'per-character':
+          'Array.from(text), preserving punctuation and spaces as animated visual units',
+        'per-word':
+          'regex /(\\S+|\\s+)/g; create spans for words and whitespace, but animate only non-whitespace spans',
+        'per-line': 'split on explicit "\\n"; each line is an animated block span',
+      },
+      stagger_rank_algorithms: {
+        normal: 'rank equals DOM unit index',
+        reverse: 'rank 0 starts at last animated unit and proceeds backward',
+        'center-out': 'sort animated indices by absolute distance from center, ties by lower index',
+        'edges-in': 'alternate left edge, right edge, then move inward',
+      },
+      frame_materialization: {
+        transform_order:
+          'translate3d(x_px, y_px * runtime.y_travel_multiplier, z_px) rotateX(rotate_x_deg) rotateY(rotate_y_deg) rotate(rotate_deg) scale(scale)',
+        filter: 'blur(blur_px)',
+        opacity_default: 1,
+        scale_default: 1,
+        letter_spacing:
+          'for per-character targets, split letter_spacing_em across marginLeft/marginRight halves on glyphs; otherwise assign letterSpacing directly',
+        fill: 'final frame must remain applied after each phase completes',
+      },
+      loop_algorithm: [
+        'Wait initial_delay_ms before starting the first enter.',
+        'Create current phrase, apply enter.from to every animated unit, append it, then animate enter.',
+        'After the first enter completes, wait hold_ms.',
+        'Loop from the visible phrase: animate current units through exit.',
+        'Create next phrase off-DOM and apply enter.from.',
+        'After the exit completes, wait micro_delay_ms.',
+        'Replace the stage contents with the next phrase and animate enter.',
+        'After the next enter completes, wait gap_ms.',
+        'Continue the loop by exiting the currently visible phrase; do not run another enter for a phrase that is already visible.',
+      ],
+      canonical_loop_pseudocode: [
+        'current = createPhrase(firstText); append(current); await enter(current);',
+        'while active:',
+        '  await sleep(hold_ms);',
+        '  await exit(current);',
+        '  next = createPhrase(nextText); applyEnterFrom(next);',
+        '  await sleep(micro_delay_ms);',
+        '  replaceStage(next);',
+        '  current = next;',
+        '  await enter(current);',
+        '  await sleep(gap_ms);',
+        'Do not put await enter(current) at the top of the while loop; that double-enters the phrase that just entered before gap_ms.',
+      ],
+      loop_invariants: [
+        'The initial phrase enters exactly once before the loop body.',
+        'Every later phrase enters exactly once immediately after replacement.',
+        'If implementation awaits an animation or tween promise, do not also sleep for that phase total; use either await completion or sleep(total), not both.',
+        'Do not implement an enter-only demo when exact playback is requested; preserve exit, replacement, micro-delay, gap, cancellation, and final-frame snapping.',
+      ],
+      current_site_swap_support: {
+        uses_micro_delay_ms: true,
+        uses_overlap_ms: false,
+        branches_on_swap_mode: false,
+        note: 'The portable swap block may describe broader intent; the current site showcase uses the playback recipe here as the exact behavior.',
+      },
+    },
+    'shared-slide-opacity-stage': {
+      id: 'shared-slide-opacity-stage',
+      summary:
+        'Move the full phrase as one title-level transform while staggering only word opacity.',
+      required_dom: [
+        'one h3.text-animation-title for the full phrase transform',
+        'word spans are nested inside the title and only receive opacity animation',
+      ],
+      algorithm: [
+        'Split text as per-word by default.',
+        'Apply titleFrame(enter.from) to the h3 and word_opacity_from to each word span.',
+        'Start the h3 transform animation and every word opacity animation in the same tick; do not wait for the title transform to finish before starting word opacity.',
+        'Animate the h3 once from enter.from to enter.to using scaled enter duration.',
+        'Animate every word opacity from word_opacity_from to word_opacity_to with index * scaled enter.stagger_ms delay.',
+        'Hold, then animate only the h3 from exit.from to exit.to, clear the stage, wait gap_ms, advance to the next phrase, and repeat.',
+      ],
+      frame_materialization: {
+        title_transform: 'translate3d(x_px, y_px * runtime.y_travel_multiplier, 0) scale(scale)',
+        title_filter: 'blur(blur_px)',
+        word_animation_properties: ['opacity'],
+      },
+      initial_state: {
+        before_enter: [
+          'Set the title element to titleFrame(enter.from).',
+          'Set every non-space word span opacity to build.word_opacity_from before starting any enter tween.',
+          'Whitespace spans should preserve layout but do not receive opacity tweens.',
+        ],
+        before_exit: ['Set the title element to titleFrame(exit.from).'],
+      },
+      verification: [
+        'A GSAP implementation must call gsap.set(wordNodes, { opacity: word_opacity_from }) or assign equivalent inline styles before gsap.to(wordNodes, { opacity: word_opacity_to, ... }).',
+        'A Motion implementation must initialize every word span opacity to word_opacity_from before animate(... opacity: [word_opacity_from, word_opacity_to] ...).',
+        'A loop implementation must preserve exit and gap timing; an enter-only reveal is not an exact reproduction.',
+      ],
+    },
+    'kinetic-center-build': {
+      id: 'kinetic-center-build',
+      summary:
+        'Build a centered horizontal phrase word by word; each incoming word enters from the right and pushes existing words into newly centered positions.',
+      required_measurements: ['offsetWidth for every word after appending the incoming word'],
+      algorithm: [
+        'Create a relative kinetic line container using the kinetic-line-host stage preset.',
+        'For each phrase word, append an absolutely centered word span.',
+        'Measure all child widths and compute centered x positions: totalWidth = sum(widths) + word_gap_px * (count - 1); cursor starts at -totalWidth / 2; each word position is cursor + width / 2.',
+        'First word enters at x=0 with first_word_y_px, entry_scale, entry_blur_px, and opacity 0, then settles to x=0/y=0/scale=1/blur=0/opacity=1.',
+        'For later words, animate existing words from previous x positions to next centered x positions while the incoming word starts at targetX + entry_offset_px and lands at targetX.',
+        'Use an intermediate keyframe around offset 0.52 for existing-word reflow blur and 0.6 for incoming-word settle blur.',
+        'After every push, snap all words to exact final poses to avoid accumulated engine drift.',
+        'Exit all words together from current centered x positions with exit_y_px and exit_blur_px, then clear the line.',
+      ],
+      frame_materialization: {
+        coordinate_space:
+          'x/y values are renderer pixel coordinates and are not multiplied by runtime.y_travel_multiplier.',
+        transform: 'translate(-50%, -50%) translate3d(x, y, 0) scale(scale)',
+        filter: 'blur(blur)',
+        opacity: 'unit opacity',
+      },
+      keyframe_recipe: {
+        first_word: [
+          {
+            offset: 0,
+            x: 0,
+            y: 'build.first_word_y_px',
+            scale: 'build.entry_scale',
+            blur: 'build.entry_blur_px',
+            opacity: 0,
+          },
+          {
+            offset: 0.58,
+            x: 0,
+            y: 'build.first_word_y_px * 0.35',
+            scale: 0.998,
+            blur: 'build.entry_blur_px * 0.45',
+            opacity: 0.78,
+          },
+          { offset: 1, x: 0, y: 0, scale: 1, blur: 0, opacity: 1 },
+        ],
+        existing_word_push: [
+          { offset: 0, x: 'currentX', y: 0, scale: 1, blur: 0, opacity: 1 },
+          {
+            offset: 0.52,
+            x: 'mix(currentX, nextX, 0.58)',
+            y: 0,
+            scale: 1,
+            blur: 'build.reflow_blur_px',
+            opacity: 1,
+          },
+          { offset: 1, x: 'nextX', y: 0, scale: 1, blur: 0, opacity: 1 },
+        ],
+        incoming_word_push: [
+          {
+            offset: 0,
+            x: 'targetX + build.entry_offset_px',
+            y: 0,
+            scale: 'build.entry_scale',
+            blur: 'build.entry_blur_px',
+            opacity: 0,
+          },
+          {
+            offset: 0.6,
+            x: 'mix(targetX + build.entry_offset_px, targetX, 0.72)',
+            y: 0,
+            scale: 0.998,
+            blur: 'build.entry_blur_px * 0.38',
+            opacity: 0.84,
+          },
+          { offset: 1, x: 'targetX', y: 0, scale: 1, blur: 0, opacity: 1 },
+        ],
+        exit_word: [
+          { offset: 0, x: 'position', y: 0, scale: 1, blur: 0, opacity: 1 },
+          {
+            offset: 0.52,
+            x: 'position',
+            y: 'build.exit_y_px * 0.45',
+            scale: 1,
+            blur: 'build.exit_blur_px * 0.55',
+            opacity: 0.62,
+          },
+          {
+            offset: 1,
+            x: 'position',
+            y: 'build.exit_y_px',
+            scale: 1,
+            blur: 'build.exit_blur_px',
+            opacity: 0,
+          },
+        ],
+      },
+    },
+    'kinetic-top-build': {
+      id: 'kinetic-top-build',
+      summary:
+        'Build a centered vertical stack word by word; each incoming word drops from above and pushes existing words into newly centered y positions.',
+      required_measurements: ['offsetHeight for every word after appending the incoming word'],
+      algorithm: [
+        'Create a relative kinetic stack container using the kinetic-stack-host stage preset.',
+        'For each phrase word, append an absolutely centered word span.',
+        'Measure all child heights and compute centered y positions: totalHeight = sum(heights) + line_gap_px * (count - 1); cursor starts at -totalHeight / 2; each word position is cursor + height / 2.',
+        'First word enters at y=first_word_y_px with entry_scale, entry_blur_px, and opacity 0, then settles to y=0/scale=1/blur=0/opacity=1.',
+        'For later words, animate existing words from previous y positions to next centered y positions while the incoming word starts at targetY + entry_offset_y_px and lands at targetY.',
+        'Use an intermediate keyframe around offset 0.52 for existing-word reflow blur and 0.6 for incoming-word settle blur.',
+        'After every push, snap all words to exact final poses to avoid accumulated engine drift.',
+        'Exit all words together from current centered y positions with exit_y_px and exit_blur_px, then clear the stack.',
+      ],
+      frame_materialization: {
+        coordinate_space:
+          'x/y values are renderer pixel coordinates and are not multiplied by runtime.y_travel_multiplier.',
+        transform: 'translate(-50%, -50%) translate3d(0, y, 0) scale(scale)',
+        filter: 'blur(blur)',
+        opacity: 'unit opacity',
+      },
+      keyframe_recipe: {
+        first_word: [
+          {
+            offset: 0,
+            x: 0,
+            y: 'build.first_word_y_px',
+            scale: 'build.entry_scale',
+            blur: 'build.entry_blur_px',
+            opacity: 0,
+          },
+          {
+            offset: 0.58,
+            x: 0,
+            y: 'build.first_word_y_px * 0.35',
+            scale: 0.998,
+            blur: 'build.entry_blur_px * 0.45',
+            opacity: 0.78,
+          },
+          { offset: 1, x: 0, y: 0, scale: 1, blur: 0, opacity: 1 },
+        ],
+        existing_word_push: [
+          { offset: 0, x: 0, y: 'currentY', scale: 1, blur: 0, opacity: 1 },
+          {
+            offset: 0.52,
+            x: 0,
+            y: 'mix(currentY, nextY, 0.58)',
+            scale: 1,
+            blur: 'build.reflow_blur_px',
+            opacity: 1,
+          },
+          { offset: 1, x: 0, y: 'nextY', scale: 1, blur: 0, opacity: 1 },
+        ],
+        incoming_word_push: [
+          {
+            offset: 0,
+            x: 0,
+            y: 'targetY + build.entry_offset_y_px',
+            scale: 'build.entry_scale',
+            blur: 'build.entry_blur_px',
+            opacity: 0,
+          },
+          {
+            offset: 0.6,
+            x: 0,
+            y: 'mix(targetY + build.entry_offset_y_px, targetY, 0.72)',
+            scale: 0.998,
+            blur: 'build.entry_blur_px * 0.38',
+            opacity: 0.84,
+          },
+          { offset: 1, x: 0, y: 'targetY', scale: 1, blur: 0, opacity: 1 },
+        ],
+        exit_word: [
+          { offset: 0, x: 0, y: 'position', scale: 1, blur: 0, opacity: 1 },
+          {
+            offset: 0.52,
+            x: 0,
+            y: 'position + build.exit_y_px * 0.45',
+            scale: 1,
+            blur: 'build.exit_blur_px * 0.55',
+            opacity: 0.62,
+          },
+          {
+            offset: 1,
+            x: 0,
+            y: 'position + build.exit_y_px',
+            scale: 1,
+            blur: 'build.exit_blur_px',
+            opacity: 0,
+          },
+        ],
+      },
+    },
+  };
+}
+
+function createEngineNotes(renderer) {
+  const notes = [
+    {
+      engine: 'WAAPI',
+      notes: [
+        'Use Element.animate(keyframes, { delay, duration, easing, fill: "forwards" }).',
+        'For multi-keyframe effects, keep offsets on the keyframes and apply easing at the animation options level to match the site runtime.',
+      ],
+    },
+    {
+      engine: 'Motion',
+      notes: [
+        'Use imperative animate(element, keyframes, options) when reproducing the site loops.',
+        'Convert CSS cubic-bezier strings to cubicBezier(x1, y1, x2, y2), convert steps(n, start|end) to steps(n, direction), and pass explicit times for keyframe offsets.',
+      ],
+    },
+    {
+      engine: 'GSAP',
+      notes: [
+        'Register CustomEase for CSS cubic-bezier curves; map linear to ease "none" and steps(n, end) to GSAP steps(n).',
+        'For multi-keyframe effects, convert offset gaps into per-keyframe segment durations in seconds and keep one tween-level ease. Do not also pass a top-level duration when segment durations are present.',
+      ],
+    },
+  ];
+
+  if (renderer === 'generic-stagger') {
+    notes.push({
+      engine: 'CSS',
+      notes: [
+        'CSS keyframes are viable for simple generic-stagger effects if every unit gets the same keyframes and computed delay.',
+        'CSS alone is usually not sufficient for the site loop unless JavaScript handles content replacement timing.',
+      ],
+    });
+  }
+
+  if (renderer === 'kinetic-center-build' || renderer === 'kinetic-top-build') {
+    notes.push({
+      engine: 'All engines',
+      notes: [
+        'Do not apply runtime.y_travel_multiplier to kinetic build x/y coordinates; buildKineticFrame uses the build params as final transform pixels.',
+        'Use explicit offset keyframes for the intermediate reflow frames, then snap final styles after each push to avoid layout drift.',
+      ],
+    });
+  }
+
+  return notes;
+}
+
 function getStagePresetId(renderer) {
   if (renderer === 'kinetic-center-build') {
-    return 'kinetic-line-card';
+    return 'kinetic-line-host';
   }
 
   if (renderer === 'kinetic-top-build') {
-    return 'kinetic-stack-card';
+    return 'kinetic-stack-host';
   }
 
-  return 'default-title-card';
+  return 'default-text-host';
+}
+
+function createLibraryAdapters() {
+  const rendererNotes = {
+    'generic-stagger': [
+      'Create split units from target and animate only the animated units.',
+      'Delay each unit by stagger rank * scaled_stagger_ms.',
+      'Use materialized transform/filter/opacity keyframes from rendering_contract.transform_order.',
+      'Implement the complete playback loop from renderer.recipe.loop_algorithm: initial enter once, hold, exit current, micro-delay, replace next, enter next, gap, then exit that visible phrase.',
+      'Do not restart enter on a phrase that is already visible after gap; the next cycle starts with exit for the current phrase.',
+      'When awaiting animation completion promises, wait hold_ms/micro_delay_ms/gap_ms only; do not also sleep enter_total_ms or exit_total_ms.',
+      'Reject the code shape `while (...) { await enter(current); ... await enter(next); await sleep(gap); }`; it double-enters the visible phrase. Use renderer.recipe.canonical_loop_pseudocode instead.',
+    ],
+    'shared-slide-opacity-stage': [
+      'Animate the title-level transform and every word opacity animation concurrently.',
+      'Before starting enter animations, set every non-space word span to build.word_opacity_from; otherwise the opacity reveal will be invisible.',
+      'For GSAP, call gsap.set(wordNodes, { opacity: build.word_opacity_from }) before one batched gsap.to(wordNodes, { opacity: build.word_opacity_to, stagger, ... }) tween; do not create one opacity tween per word unless the delays are non-uniform.',
+      'For Motion, assign style.opacity = build.word_opacity_from before animate(wordNode, { opacity: [from, to] }, ...).',
+      'Use enter_title for the phrase transform and enter_word_opacity for word fades.',
+      'Exit animates only the title-level frame, then clears/replaces content according to playback.',
+      'Do not ship an enter-only reveal when exact playback is requested; include hold, exit, gap, phrase advance, cancellation, and final-frame snapping.',
+    ],
+    'kinetic-center-build': [
+      'Measure word widths after appending each incoming word.',
+      'Compute centered x positions from measured widths and word_gap_px.',
+      'Use raw renderer-pixel build x/y values; do not apply y_travel_multiplier to kinetic coordinates.',
+      'Use renderer.recipe.keyframe_recipe exactly: existing-word reflow x is mix(currentX, nextX, 0.58) at offset 0.52; incoming-word settle x is mix(startX, targetX, 0.72) at offset 0.6.',
+      'Exit uses a three-keyframe path with offset 0.52 at y = exit_y_px * 0.45 and opacity 0.62, not a two-keyframe fade.',
+    ],
+    'kinetic-top-build': [
+      'Measure word heights after appending each incoming word.',
+      'Compute centered y positions from measured heights and line_gap_px.',
+      'Use raw renderer-pixel build x/y values; do not apply y_travel_multiplier to kinetic coordinates.',
+      'Use renderer.recipe.keyframe_recipe exactly: existing-word reflow y is mix(currentY, nextY, 0.58) at offset 0.52; incoming-word settle y is mix(startY, targetY, 0.72) at offset 0.6.',
+      'Exit uses a three-keyframe path with offset 0.52 at y = position + exit_y_px * 0.45 and opacity 0.62, not a two-keyframe fade.',
+    ],
+  };
+
+  return {
+    waapi: {
+      target_library: 'Web Animations API',
+      install: 'none; native browser Element.animate',
+      import_statement: null,
+      time_unit: 'milliseconds',
+      start_animation:
+        'element.animate(keyframes, { delay: delay_ms, duration: duration_ms, easing, fill: "forwards" })',
+      keyframe_shape:
+        'Use CSS-style Keyframe[] objects with transform, filter, opacity, letterSpacing, and optional offset fields.',
+      easing: 'Pass CSS easing strings directly, including cubic-bezier(...) and steps(...).',
+      completion:
+        'await animation.finished, then assign the final keyframe styles before replacing content.',
+      cancellation: 'cancel active Animation objects and clear pending timers on teardown.',
+      renderers: rendererNotes,
+    },
+    motion: {
+      target_library: 'Motion for React / motion.dev',
+      install: 'pnpm add motion',
+      import_statement: 'import { animate, cubicBezier, steps } from "motion/react";',
+      time_unit: 'seconds for delay and duration options',
+      start_animation:
+        'animate(element, propertyKeyframes, { delay: delay_ms / 1000, duration: duration_ms / 1000, ease, times })',
+      keyframe_shape:
+        'Convert Keyframe[] into property arrays, for example { opacity: [0, 1], transform: ["...", "..."], filter: ["...", "..."] }. Convert keyframe offset values into the times array.',
+      verification: [
+        'When offsets are present, pass times in the Motion options object, not inside the propertyKeyframes object.',
+        'The Motion times array length must match each animated property array length for that tween.',
+        'Motion TypeScript may reject CSS transform/filter property arrays; use a local typed helper/cast at the animate boundary instead of changing the keyframe shape.',
+        'Exact reproduction must include exit/replacement playback, not only initial enter tweens.',
+      ],
+      easing:
+        'Convert cubic-bezier(a,b,c,d) to cubicBezier(a,b,c,d). Convert steps(n,start|end) to steps(n, "start"|"end"). Map CSS ease-in/ease-out/ease-in-out to Motion easeIn/easeOut/easeInOut.',
+      completion:
+        'Use controls.then(...) or await the returned controls in an async loop, then assign final styles before content replacement.',
+      cancellation:
+        'call controls.stop?.() and controls.cancel?.() for active Motion animations when available, and clear timers on teardown.',
+      renderers: rendererNotes,
+    },
+    gsap: {
+      target_library: 'GSAP',
+      install: 'pnpm add gsap',
+      import_statement:
+        'import { gsap } from "gsap"; import { CustomEase } from "gsap/CustomEase"; gsap.registerPlugin(CustomEase);',
+      time_unit: 'seconds for delay and duration options',
+      start_animation:
+        'gsap.set(element, firstKeyframe); gsap.to(element, { keyframes: remainingKeyframesWithSegmentDurations, delay: delay_ms / 1000, ease, overwrite: "auto" })',
+      keyframe_shape:
+        'Use GSAP property objects with transform, filter, opacity, letterSpacing. For offset keyframes, convert adjacent offset gaps into absolute per-keyframe segment durations in seconds.',
+      verification: [
+        'Initialize first-frame styles with gsap.set before starting a tween.',
+        'Do not pass both per-keyframe segment durations and a top-level gsap.to duration; that retimes the tween and makes the GSAP reproduction feel slower than the spec.',
+        'For renderer keyframe_recipe offsets, use GSAP keyframes with equivalent segment durations or a timeline that preserves the same absolute offsets.',
+        'For generic-stagger loops, do not enter the same visible phrase twice; after gap, the next action is exit of the current phrase.',
+      ],
+      easing:
+        'Convert cubic-bezier(a,b,c,d) with CustomEase.create(...). Use "none" for linear. Convert steps(n,end) to GSAP steps(n).',
+      completion:
+        'Wrap tweens/timelines in a Promise resolved by onComplete, then assign final styles before replacing content.',
+      cancellation: 'kill active tweens/timelines and clear timers on teardown.',
+      renderers: rendererNotes,
+    },
+  };
+}
+
+function createContentUsage() {
+  return {
+    default_policy:
+      'When applying an effect to an existing heading or text section, preserve the section text. Do not replace user/application copy with showcase sample text unless the user explicitly asks to reproduce the demo copy.',
+    showcase_samples:
+      'showcase.content.sample and samples are reference/demo copy used by the generated website examples and useful fallback copy for isolated demos.',
+    loop_policy:
+      'If the existing section supplies multiple phrases, loop those phrases. If it supplies one phrase, animate that phrase with the same enter/exit playback or use explicitly provided alternate phrases.',
+  };
+}
+
+function createEffectLibraryAdapters(renderer) {
+  const adapters = createLibraryAdapters();
+
+  return Object.fromEntries(
+    Object.entries(adapters).map(([key, adapter]) => {
+      const { renderers, ...sharedAdapter } = adapter;
+
+      return [
+        key,
+        {
+          ...sharedAdapter,
+          renderer_notes: renderers[renderer] ?? renderers['generic-stagger'],
+        },
+      ];
+    }),
+  );
+}
+
+function createLibrarySelection() {
+  return {
+    supported_adapters: ['waapi', 'motion', 'gsap'],
+    aliases: {
+      'web animations api': 'waapi',
+      waapi: 'waapi',
+      motion: 'motion',
+      'motion.dev': 'motion',
+      'motion react': 'motion',
+      'framer motion': 'motion',
+      gsap: 'gsap',
+      greensock: 'gsap',
+    },
+    rule: 'If the user names a target animation library, use only the matching adapter for that effect. Do not silently substitute Motion for GSAP, GSAP for Motion, or WAAPI for either library. If a requested library is unsupported, state that limitation before implementing.',
+    verification:
+      'For generated code, verify imports and animation calls match the selected adapter: Motion should import/use animate from motion/react and not Element.animate/gsap, GSAP should import/use gsap and CustomEase and not Motion/Element.animate, and WAAPI should use Element.animate without a third-party animation import.',
+  };
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function mergeStagePreset(basePreset, preset) {
+  const merged = { ...basePreset };
+
+  for (const [key, value] of Object.entries(preset)) {
+    if (isPlainObject(value) && isPlainObject(merged[key])) {
+      merged[key] = { ...merged[key], ...value };
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  return merged;
+}
+
+function resolveStagePreset(stagePresets, stagePresetKey, seen = new Set()) {
+  const stagePreset = stagePresets[stagePresetKey];
+
+  if (!stagePreset) {
+    return null;
+  }
+
+  if (!stagePreset.base_preset) {
+    return stagePreset;
+  }
+
+  if (seen.has(stagePresetKey)) {
+    throw new Error(`Circular stage preset inheritance detected for ${stagePresetKey}.`);
+  }
+
+  const nextSeen = new Set(seen);
+  nextSeen.add(stagePresetKey);
+
+  const basePreset = resolveStagePreset(stagePresets, stagePreset.base_preset, nextSeen);
+
+  const { base_preset, ...stagePresetWithoutBase } = stagePreset;
+  void base_preset;
+
+  return mergeStagePreset(basePreset, stagePresetWithoutBase);
 }
 
 function createShowcaseRenderer(spec, renderer) {
@@ -369,13 +916,249 @@ function createSiteReproductionNotes(renderer, runtimePreset) {
   }
 
   notes.push(
-    `For site parity, scale duration and stagger timing by ${runtimePreset.speed_multiplier} and scale vertical travel by ${runtimePreset.y_travel_multiplier}. These runtime transforms materially affect the perceived pace and distance.`,
+    renderer === 'kinetic-center-build' || renderer === 'kinetic-top-build'
+      ? `For site parity, scale duration and stagger timing by ${runtimePreset.speed_multiplier}. Keep kinetic build x/y params as raw renderer pixel coordinates; runtime.y_travel_multiplier applies to generic/title frame conversion, not to buildKineticFrame coordinates.`
+      : `For site parity, scale duration and stagger timing by ${runtimePreset.speed_multiplier} and scale vertical travel by ${runtimePreset.y_travel_multiplier}. These runtime transforms materially affect the perceived pace and distance.`,
   );
   notes.push(
-    'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+    'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
   );
 
   return notes;
+}
+
+function createPortableSpec(spec) {
+  const { site_reference, visibility, renderer, ...portableSpec } = spec;
+  void site_reference;
+  void visibility;
+  void renderer;
+
+  return portableSpec;
+}
+
+function createPhaseTiming(phase, runtimePreset, minimum = 140) {
+  return {
+    source_duration_ms: phase.duration_ms,
+    source_stagger_ms: phase.stagger_ms,
+    scaled_duration_ms: Math.max(
+      minimum,
+      Math.round(phase.duration_ms * runtimePreset.speed_multiplier),
+    ),
+    scaled_stagger_ms: Math.max(0, Math.round(phase.stagger_ms * runtimePreset.speed_multiplier)),
+    easing: phase.easing,
+  };
+}
+
+function createTimingRecipe(spec, renderer, runtimePreset) {
+  const build = spec.build ?? {};
+
+  if (renderer === 'shared-slide-opacity-stage') {
+    return {
+      enter_title: createPhaseTiming(spec.enter, runtimePreset, 180),
+      enter_word_opacity: {
+        source_duration_ms: build.word_opacity_duration_ms ?? 170,
+        scaled_duration_ms: scaleDuration(
+          build.word_opacity_duration_ms,
+          170,
+          runtimePreset.speed_multiplier,
+          90,
+        ),
+        delay_step_ms: Math.max(
+          0,
+          Math.round((spec.enter.stagger_ms || 72) * runtimePreset.speed_multiplier),
+        ),
+        easing: spec.enter.easing,
+      },
+      exit_title: createPhaseTiming(spec.exit, runtimePreset, 140),
+      total_formulas: {
+        enter_total_ms: 'enter_title.scaled_duration_ms',
+        exit_total_ms: 'exit_title.scaled_duration_ms',
+      },
+    };
+  }
+
+  if (renderer === 'kinetic-center-build') {
+    return {
+      first_word: {
+        source_duration_ms: build.first_word_duration_ms ?? 360,
+        scaled_duration_ms: scaleDuration(
+          build.first_word_duration_ms,
+          360,
+          runtimePreset.speed_multiplier,
+          180,
+        ),
+        easing: build.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      },
+      push: {
+        source_duration_ms: build.push_duration_ms ?? 480,
+        scaled_duration_ms: scaleDuration(
+          build.push_duration_ms,
+          480,
+          runtimePreset.speed_multiplier,
+          180,
+        ),
+        easing: build.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      },
+      exit: {
+        source_duration_ms: build.exit_duration_ms ?? 260,
+        scaled_duration_ms: scaleDuration(
+          build.exit_duration_ms,
+          260,
+          runtimePreset.speed_multiplier,
+          140,
+        ),
+        easing: build.exit_easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      hold_ms: scaleDuration(build.hold_ms, 980, runtimePreset.speed_multiplier, 380),
+      gap_ms: scaleDuration(build.between_phrases_ms, 220, runtimePreset.speed_multiplier, 120),
+    };
+  }
+
+  if (renderer === 'kinetic-top-build') {
+    return {
+      first_word: {
+        source_duration_ms: build.first_word_duration_ms ?? 360,
+        scaled_duration_ms: scaleDuration(
+          build.first_word_duration_ms,
+          360,
+          runtimePreset.speed_multiplier,
+          180,
+        ),
+        easing: build.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      },
+      push: {
+        source_duration_ms: build.push_duration_ms ?? 500,
+        scaled_duration_ms: scaleDuration(
+          build.push_duration_ms,
+          500,
+          runtimePreset.speed_multiplier,
+          180,
+        ),
+        easing: build.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      },
+      exit: {
+        source_duration_ms: build.exit_duration_ms ?? 320,
+        scaled_duration_ms: scaleDuration(
+          build.exit_duration_ms,
+          320,
+          runtimePreset.speed_multiplier,
+          140,
+        ),
+        easing: build.exit_easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      hold_ms: scaleDuration(build.hold_ms, 1100, runtimePreset.speed_multiplier, 380),
+      gap_ms: scaleDuration(build.between_phrases_ms, 220, runtimePreset.speed_multiplier, 120),
+    };
+  }
+
+  return {
+    enter: createPhaseTiming(spec.enter, runtimePreset),
+    exit: createPhaseTiming(spec.exit, runtimePreset),
+    total_formulas: {
+      enter_total_ms:
+        'enter.scaled_duration_ms + max(0, animated_unit_count - 1) * enter.scaled_stagger_ms',
+      exit_total_ms:
+        'exit.scaled_duration_ms + max(0, animated_unit_count - 1) * exit.scaled_stagger_ms',
+    },
+  };
+}
+
+function createRenderingContract(spec, renderer, runtimePreset) {
+  if (renderer === 'kinetic-center-build' || renderer === 'kinetic-top-build') {
+    return {
+      renderer,
+      target: spec.target,
+      stagger_mode: spec.stagger_mode ?? 'normal',
+      coordinate_space: 'renderer-pixels',
+      y_travel_multiplier: 1,
+      y_travel_multiplier_note:
+        'runtime.y_travel_multiplier is not applied to kinetic build coordinates; x/y values in build params are final transform pixels.',
+      transform_order:
+        renderer === 'kinetic-center-build'
+          ? 'translate(-50%, -50%) translate3d(x_px, y_px, 0) scale(scale)'
+          : 'translate(-50%, -50%) translate3d(0, y_px, 0) scale(scale)',
+      fill_behavior: 'retain final frame after each phase',
+      initial_delay_ms: runtimePreset.initial_delay_ms,
+      content_replacement: 'follow renderer recipe algorithm',
+    };
+  }
+
+  return {
+    renderer,
+    target: spec.target,
+    stagger_mode: spec.stagger_mode ?? 'normal',
+    y_travel_multiplier: runtimePreset.y_travel_multiplier,
+    transform_order:
+      'translate3d(x_px, y_px * y_travel_multiplier, z_px) rotateX(rotate_x_deg) rotateY(rotate_y_deg) rotate(rotate_deg) scale(scale)',
+    fill_behavior: 'retain final frame after each phase',
+    initial_delay_ms: runtimePreset.initial_delay_ms,
+    content_replacement:
+      renderer === 'generic-stagger'
+        ? 'current phrase is cleared and replaced only after exit_total_ms + micro_delay_ms'
+        : 'follow renderer recipe algorithm',
+  };
+}
+
+function createEffectRecipe(
+  spec,
+  visibleSet,
+  samples,
+  runtimePresets,
+  stagePresets,
+  rendererOverrides,
+) {
+  const visibility = visibleSet.has(spec.id) ? 'visible' : 'hidden';
+  const portableSpec = createPortableSpec(spec);
+
+  if (visibility !== 'visible' || !samples[spec.id]) {
+    return {
+      id: spec.id,
+      visibility,
+      portable_spec: portableSpec,
+      showcase: null,
+    };
+  }
+
+  const runtimePresetKey = 'website-default';
+  const renderer = getShowcaseRendererForId(spec, rendererOverrides);
+  const stagePresetKey = getStagePresetId(renderer);
+  const runtimePreset = runtimePresets[runtimePresetKey];
+  const stagePreset = resolveStagePreset(stagePresets, stagePresetKey);
+  const rendererRecipes = createRendererRecipes();
+  const rendererRecipe = rendererRecipes[renderer];
+
+  return {
+    id: spec.id,
+    visibility,
+    portable_spec: portableSpec,
+    showcase: {
+      content: samples[spec.id],
+      content_usage: createContentUsage(),
+      sample_source: {
+        asset: 'assets/samples.json',
+        key: spec.id,
+      },
+      renderer: {
+        ...createShowcaseRenderer(spec, renderer),
+        recipe: rendererRecipe,
+      },
+      runtime: {
+        preset: runtimePresetKey,
+        ...runtimePreset,
+      },
+      playback: createShowcasePlayback(spec, renderer, runtimePreset),
+      timing: createTimingRecipe(spec, renderer, runtimePreset),
+      stage: {
+        preset: stagePresetKey,
+        ...stagePreset,
+      },
+      rendering_contract: createRenderingContract(spec, renderer, runtimePreset),
+      library_selection: createLibrarySelection(),
+      library_adapters: createEffectLibraryAdapters(renderer),
+      engine_notes: createEngineNotes(renderer),
+      reproduction_notes: createSiteReproductionNotes(renderer, runtimePreset),
+    },
+  };
 }
 
 function createPublicSpec(
@@ -400,7 +1183,7 @@ function createPublicSpec(
   const renderer = getShowcaseRendererForId(spec, rendererOverrides);
   const stagePresetKey = getStagePresetId(renderer);
   const runtimePreset = runtimePresets[runtimePresetKey];
-  const stagePreset = stagePresets[stagePresetKey];
+  const stagePreset = resolveStagePreset(stagePresets, stagePresetKey);
 
   return {
     ...spec,
@@ -540,7 +1323,6 @@ export interface TextAnimationSpec {
   exit: TextAnimationPhaseSpec;
   swap?: TextAnimationSwapSpec;
   usage_notes: string;
-  preview: string;
   custom_renderer?: TextAnimationRenderer;
   stagger_mode?: TextAnimationStaggerMode;
   build?: TextAnimationBuildSpec;
@@ -636,7 +1418,11 @@ const specsDir = new URL('../assets/specs/', import.meta.url);
 const visibleOrder = new Map(catalog.visible_ids.map((id, index) => [id, index]));
 const specs = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
-  .map((fileName) => readJson(new URL(\`../assets/specs/\${fileName}\`, import.meta.url)))
+  .map((fileName) => {
+    const spec = readJson(new URL(\`../assets/specs/\${fileName}\`, import.meta.url));
+    const effect = readJson(new URL(\`../assets/effects/\${fileName}\`, import.meta.url));
+    return { ...spec, effect };
+  })
   .sort((left, right) => {
     const leftVisible = visibleOrder.has(left.id);
     const rightVisible = visibleOrder.has(right.id);
@@ -660,7 +1446,11 @@ const specs = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? catalog.renderer_overrides?.[spec.id] ?? null,
+    renderer:
+      spec.effect?.showcase?.renderer?.id ??
+      spec.custom_renderer ??
+      catalog.renderer_overrides?.[spec.id] ??
+      null,
     visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
   }));
 
@@ -689,6 +1479,27 @@ try {
 `;
 }
 
+function createSkillGetEffectScript() {
+  return `#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+
+const id = process.argv[2]?.trim();
+
+if (!id) {
+  process.stderr.write('Usage: node scripts/get-effect.mjs <id>\\n');
+  process.exit(1);
+}
+
+try {
+  const effect = JSON.parse(readFileSync(new URL(\`../assets/effects/\${id}.json\`, import.meta.url), 'utf8'));
+  process.stdout.write(\`\${JSON.stringify(effect, null, 2)}\\n\`);
+} catch (_error) {
+  process.stderr.write(\`Unknown effect id: \${id}\\n\`);
+  process.exit(1);
+}
+`;
+}
+
 function createSkillFindScript() {
   return `#!/usr/bin/env node
 import { readFileSync, readdirSync } from 'node:fs';
@@ -706,7 +1517,7 @@ function scoreSpec(spec, query, terms) {
   const inspiration = spec.inspiration.toLowerCase();
   const usageNotes = spec.usage_notes.toLowerCase();
   const target = spec.target.toLowerCase();
-  const renderer = (spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? '').toLowerCase();
+  const renderer = (spec.effect?.showcase?.renderer?.id ?? spec.custom_renderer ?? '').toLowerCase();
 
   if (id === query) score += 120;
   if (displayName === query) score += 100;
@@ -743,7 +1554,11 @@ const specsDir = new URL('../assets/specs/', import.meta.url);
 
 const results = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
-  .map((fileName) => readJson(new URL(\`../assets/specs/\${fileName}\`, import.meta.url)))
+  .map((fileName) => {
+    const spec = readJson(new URL(\`../assets/specs/\${fileName}\`, import.meta.url));
+    const effect = readJson(new URL(\`../assets/effects/\${fileName}\`, import.meta.url));
+    return { ...spec, effect };
+  })
   .map((spec) => {
     return {
       spec,
@@ -779,7 +1594,7 @@ const results = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? null,
+    renderer: spec.effect?.showcase?.renderer?.id ?? spec.custom_renderer ?? null,
     visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
     score,
   }));
@@ -822,6 +1637,7 @@ export function validateCatalogData(data) {
   const stagePresets = createStagePresets();
   const visibleIds = catalog.visible_ids ?? [];
   const rendererOverrides = catalog.renderer_overrides ?? {};
+  const rendererRecipes = createRendererRecipes();
 
   const validateKeys = (fileName, value, allowedKeys, label) => {
     for (const key of Object.keys(value ?? {})) {
@@ -924,6 +1740,10 @@ export function validateCatalogData(data) {
       );
     }
 
+    if (!rendererRecipes[renderer]) {
+      errors.push(`Visible effect "${id}" resolves to undocumented renderer "${renderer}".`);
+    }
+
     if (!samples[id]) {
       errors.push(`Visible effect "${id}" is missing showcase content.`);
     }
@@ -951,6 +1771,23 @@ export function validateCatalogData(data) {
     if (!publicSpec.site_reference) {
       errors.push(`Visible effect "${id}" did not generate a site_reference block.`);
     }
+
+    const effectRecipe = createEffectRecipe(
+      spec,
+      new Set(visibleIds),
+      samples,
+      runtimePresets,
+      stagePresets,
+      rendererOverrides,
+    );
+
+    if (effectRecipe.showcase?.renderer?.id !== renderer) {
+      errors.push(`Visible effect "${id}" generated an inconsistent effect renderer.`);
+    }
+
+    if (effectRecipe.showcase?.stage?.preset !== getStagePresetId(renderer)) {
+      errors.push(`Visible effect "${id}" generated an inconsistent stage preset.`);
+    }
   }
 
   if (errors.length > 0) {
@@ -964,6 +1801,8 @@ export function buildArtifacts(data) {
   const rendererOverrides = catalog.renderer_overrides ?? {};
   const runtimePresets = createRuntimePresets(runtime);
   const stagePresets = createStagePresets();
+  const rendererRecipes = createRendererRecipes();
+  const libraryAdapters = createLibraryAdapters();
   const allIds = orderIds(Object.keys(specsById), visibleIds);
   const visibleSet = new Set(visibleIds);
   const allSpecs = allIds.map((id) => {
@@ -1055,6 +1894,26 @@ export function buildArtifacts(data) {
     },
     {
       root: skillRoot,
+      relativePath: 'assets/runtime-presets.json',
+      content: toJson(runtimePresets),
+    },
+    {
+      root: skillRoot,
+      relativePath: 'assets/stage-presets.json',
+      content: toJson(stagePresets),
+    },
+    {
+      root: skillRoot,
+      relativePath: 'assets/renderer-recipes.json',
+      content: toJson(rendererRecipes),
+    },
+    {
+      root: skillRoot,
+      relativePath: 'assets/library-adapters.json',
+      content: toJson(libraryAdapters),
+    },
+    {
+      root: skillRoot,
       relativePath: 'scripts/list-specs.mjs',
       content: createSkillListScript(),
     },
@@ -1062,6 +1921,11 @@ export function buildArtifacts(data) {
       root: skillRoot,
       relativePath: 'scripts/get-spec.mjs',
       content: createSkillGetScript(),
+    },
+    {
+      root: skillRoot,
+      relativePath: 'scripts/get-effect.mjs',
+      content: createSkillGetEffectScript(),
     },
     {
       root: skillRoot,
@@ -1074,8 +1938,14 @@ export function buildArtifacts(data) {
     artifacts.push({
       root: skillRoot,
       relativePath: join('assets', 'specs', `${id}.json`),
+      content: toJson(createPortableSpec(spec)),
+    });
+
+    artifacts.push({
+      root: skillRoot,
+      relativePath: join('assets', 'effects', `${id}.json`),
       content: toJson(
-        createPublicSpec(
+        createEffectRecipe(
           spec,
           visibleSet,
           samples,

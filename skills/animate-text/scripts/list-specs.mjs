@@ -11,7 +11,11 @@ const specsDir = new URL('../assets/specs/', import.meta.url);
 const visibleOrder = new Map(catalog.visible_ids.map((id, index) => [id, index]));
 const specs = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
-  .map((fileName) => readJson(new URL(`../assets/specs/${fileName}`, import.meta.url)))
+  .map((fileName) => {
+    const spec = readJson(new URL(`../assets/specs/${fileName}`, import.meta.url));
+    const effect = readJson(new URL(`../assets/effects/${fileName}`, import.meta.url));
+    return { ...spec, effect };
+  })
   .sort((left, right) => {
     const leftVisible = visibleOrder.has(left.id);
     const rightVisible = visibleOrder.has(right.id);
@@ -36,7 +40,7 @@ const specs = readdirSync(fileURLToPath(specsDir))
     description: spec.description,
     target: spec.target,
     renderer:
-      spec.site_reference?.renderer?.id ??
+      spec.effect?.showcase?.renderer?.id ??
       spec.custom_renderer ??
       catalog.renderer_overrides?.[spec.id] ??
       null,

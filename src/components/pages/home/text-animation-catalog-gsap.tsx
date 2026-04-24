@@ -57,6 +57,7 @@ function TextAnimationCardGsap({ item }: { item: TextAnimationCatalogItem }) {
 function TextAnimationStageGsap({ item }: { item: TextAnimationCatalogItem }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -65,14 +66,53 @@ function TextAnimationStageGsap({ item }: { item: TextAnimationCatalogItem }) {
       return;
     }
 
-    setFailed(false);
+    if (!('IntersectionObserver' in window)) {
+      setIsActive(true);
+      return;
+    }
+
+    const rootMarginPx = 480;
+    const rect = stage.getBoundingClientRect();
+
+    setIsActive(rect.bottom >= -rootMarginPx && rect.top <= window.innerHeight + rootMarginPx);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const nextActive = entry.isIntersecting;
+
+        setIsActive((currentActive) => (currentActive === nextActive ? currentActive : nextActive));
+      },
+      { rootMargin: `${rootMarginPx}px 0px` },
+    );
+
+    observer.observe(stage);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+
+    if (!stage) {
+      return;
+    }
+
     stage.dataset.animationId = item.id;
+    stage.dataset.animationActive = isActive ? 'true' : 'false';
+
+    if (!isActive) {
+      return;
+    }
+
+    setFailed(false);
 
     return startTextAnimationGsapLoop(stage, item, (error) => {
       console.error(`Failed to run GSAP text animation "${item.id}"`, error);
       setFailed(true);
     });
-  }, [item]);
+  }, [isActive, item]);
 
   return (
     <div ref={stageRef} className="text-animation-stage pointer-events-none absolute inset-0 z-[1]">

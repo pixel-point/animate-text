@@ -41,8 +41,5 @@
     "overlap_ms": 150,
     "micro_delay_ms": 20
   },
-  "usage_notes": "Effective for medium word lengths where edge-to-center motion remains readable.",
-  "preview": "./previews/stagger-from-edges.html",
-  "visibility": "hidden",
-  "site_reference": null
+  "usage_notes": "Effective for medium word lengths where edge-to-center motion remains readable."
 }

@@ -4,10 +4,10 @@ Use this file as a translation aid after selecting a spec.
 
 ## Canonical Contract
 
-- `assets/specs/<id>.json` is the canonical public contract.
-- Use the top-level motion fields for the portable animation definition.
-- Use `site_reference` when you need to reproduce the current website version exactly.
-- There is no separate public effect recipe or example component to consult.
+- `assets/specs/<id>.json` is the canonical portable motion contract.
+- `assets/effects/<id>.json` is the canonical exact generated animation recipe.
+- Use the portable spec when translating motion intent into a different context.
+- Use the exact effect recipe when reproducing the generated animation behavior 1:1.
 
 ## General Mapping
 
@@ -16,7 +16,13 @@ Use this file as a translation aid after selecting a spec.
 - `easing` maps directly to CSS or library easing strings when supported.
 - `from` and `to` map to keyframe endpoints.
 - The portable `swap` block defines the intended text-replacement choreography.
-- The `site_reference.playback` block defines how the current website runtime loops the effect today.
+- The `showcase.playback` block defines how the generated runtime loops the effect.
+- The `showcase.timing` block provides pre-scaled runtime timings where they differ from raw portable values.
+- The `showcase.rendering_contract` block defines frame materialization details such as transform order and y-travel scaling.
+- The `showcase.stage` block defines only animation host requirements. It intentionally excludes font size, font weight, color, padding, card chrome, and page layout.
+- The `showcase.content_usage` block defines whether sample copy should be used or whether existing application text should be preserved.
+- The `showcase.library_selection` block defines how requested libraries map to adapters. A requested target library is binding.
+- The `showcase.library_adapters` block tells agents how to implement the same recipe with WAAPI, Motion, or GSAP.
 
 ## Target Splitting
 
@@ -28,19 +34,32 @@ Use this file as a translation aid after selecting a spec.
 ## Stack Notes
 
 - WAAPI: build explicit keyframe arrays and use per-unit `delay`.
-- Motion or Framer Motion: map timing and easing into transitions and staggered delays.
-- GSAP: map `from` and `to` fields to `fromTo()` or timeline segments.
+- Motion or Framer Motion: use `showcase.library_adapters.motion`; convert milliseconds to seconds, convert easing helpers, and pass explicit `times` for multi-keyframe offsets.
+- GSAP: use `showcase.library_adapters.gsap`; convert milliseconds to seconds, use `CustomEase` for CSS cubic-bezier curves, and convert offset gaps into GSAP keyframe segment durations. Do not combine per-keyframe segment durations with a top-level `duration` on the same `gsap.to` call.
 - CSS-only: use generated delays and keyframes when the effect is simple enough; avoid flattening layout-aware choreography into plain CSS when that loses the intended motion.
+
+## Text Ownership
+
+When applying an effect to existing UI text, preserve the application text by default. Use `showcase.content.sample`, `showcase.content.samples`, or `assets/samples.json` as demo copy only when building a standalone showcase or when the user explicitly asks for the reference copy. Exact animation parity is about timing, transforms, splitting, replacement order, and library behavior; it is not permission to overwrite product copy.
 
 ## Exact Site Reproduction
 
-When reproducing the current website example:
+When reproducing the generated animation behavior:
 
-- preserve `site_reference.renderer.id` exactly
-- preserve `site_reference.playback` ordering instead of inferring it from prose
-- preserve `site_reference.runtime.speed_multiplier` and `site_reference.runtime.y_travel_multiplier`
-- preserve `site_reference.stage` values that affect typography, max width, perspective, and kinetic container size
-- preserve the adjustments described in `site_reference.reproduction_notes`
+- use `node scripts/get-effect.mjs <id>` and treat the returned JSON as authoritative
+- preserve `showcase.renderer.id` and `showcase.renderer.recipe` exactly
+- preserve renderer `initial_state`, `verification`, and `keyframe_recipe` fields when present; these encode exact initialization and intermediate keyframes that are easy to miss from prose alone
+- preserve `showcase.playback` ordering instead of inferring it from prose
+- preserve `showcase.timing` pre-scaled durations and stagger values
+- preserve `showcase.content_usage`; do not replace existing text with showcase samples unless requested
+- preserve `showcase.runtime.speed_multiplier` and `showcase.runtime.y_travel_multiplier`
+- preserve `showcase.rendering_contract` transform materialization and coordinate-space rules
+- preserve `showcase.stage` animation host requirements, but do not copy non-animation presentation styling
+- preserve `showcase.library_selection`; do not substitute one animation library for another unless the user approves it
+- preserve the target library rules in `showcase.library_adapters.<library>`
+- preserve the adjustments described in `showcase.engine_notes` and `showcase.reproduction_notes`
+- implement the complete loop described by `showcase.playback` and `showcase.renderer.recipe`; an initial enter-only reveal is not a 1:1 reproduction
+- when awaiting animation completion promises, wait only hold/micro-delay/gap timers around those awaited phases; do not double-count phase totals
 
 ## Layout-aware Effects
 
@@ -51,3 +70,13 @@ The following effects are not simple split-and-stagger transitions and should re
 - `short-slide-down`
 
 For those effects, use the `build` block and `usage_notes` as part of the contract, not just `enter` and `exit`.
+For kinetic build renderers, do not multiply `build` x/y coordinates by `showcase.runtime.y_travel_multiplier`; the exact recipe uses raw renderer-pixel coordinates in `buildKineticFrame`.
+
+## Current Showcase Swap Semantics
+
+The portable `swap` block may describe overlap or mode intent. The generated exact recipes are more specific:
+
+- generic stagger effects currently use `showcase.playback.replacement_behavior: "exit-before-enter"`
+- generic stagger effects use `swap.micro_delay_ms`, but do not currently use `swap.overlap_ms`
+- generic stagger effects enter the first phrase once, then each loop exits the currently visible phrase, replaces content, enters the next phrase, waits gap, and repeats from exit
+- exact reproduction should follow `showcase.playback` over portable `swap` assumptions

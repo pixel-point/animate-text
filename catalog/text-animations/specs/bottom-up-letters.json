@@ -9,15 +9,27 @@
     "duration_ms": 400,
     "stagger_ms": 88,
     "easing": "cubic-bezier(0.18, 1, 0.32, 1)",
-    "from": { "opacity": 0, "y_px": 46 },
-    "to": { "opacity": 1, "y_px": 0 }
+    "from": {
+      "opacity": 0,
+      "y_px": 46
+    },
+    "to": {
+      "opacity": 1,
+      "y_px": 0
+    }
   },
   "exit": {
     "duration_ms": 280,
     "stagger_ms": 28,
     "easing": "cubic-bezier(0.7, 0, 0.84, 0)",
-    "from": { "opacity": 1, "y_px": 0 },
-    "to": { "opacity": 0, "y_px": -14 }
+    "from": {
+      "opacity": 1,
+      "y_px": 0
+    },
+    "to": {
+      "opacity": 0,
+      "y_px": -14
+    }
   },
   "swap": {
     "mode": "sequential",
@@ -41,6 +53,5 @@
       }
     }
   },
-  "usage_notes": "Best for short single words, labels, or compact headline swaps at 40px+. This version is intentionally more staged than per-character-rise: very large per-symbol delay, fewer simultaneous letters on screen, and a taller lift from below.",
-  "preview": "./previews/bottom-up-letters.html"
+  "usage_notes": "Best for short single words, labels, or compact headline swaps at 40px+. This version is intentionally more staged than per-character-rise: very large per-symbol delay, fewer simultaneous letters on screen, and a taller lift from below."
 }

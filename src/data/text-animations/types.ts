@@ -54,7 +54,6 @@ export interface TextAnimationSpec {
   exit: TextAnimationPhaseSpec;
   swap?: TextAnimationSwapSpec;
   usage_notes: string;
-  preview: string;
   custom_renderer?: TextAnimationRenderer;
   stagger_mode?: TextAnimationStaggerMode;
   build?: TextAnimationBuildSpec;

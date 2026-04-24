@@ -9,15 +9,33 @@
     "duration_ms": 360,
     "stagger_ms": 0,
     "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-    "from": { "opacity": 0, "y_px": 6, "scale": 0.992, "blur_px": 3.5 },
-    "to": { "opacity": 1, "y_px": 0, "scale": 1, "blur_px": 0 }
+    "from": {
+      "opacity": 0,
+      "y_px": 6,
+      "scale": 0.992,
+      "blur_px": 3.5
+    },
+    "to": {
+      "opacity": 1,
+      "y_px": 0,
+      "scale": 1,
+      "blur_px": 0
+    }
   },
   "exit": {
     "duration_ms": 260,
     "stagger_ms": 0,
     "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
-    "from": { "opacity": 1, "y_px": 0, "blur_px": 0 },
-    "to": { "opacity": 0, "y_px": -6, "blur_px": 2.5 }
+    "from": {
+      "opacity": 1,
+      "y_px": 0,
+      "blur_px": 0
+    },
+    "to": {
+      "opacity": 0,
+      "y_px": -6,
+      "blur_px": 2.5
+    }
   },
   "swap": {
     "mode": "sequential",
@@ -62,6 +80,5 @@
       ["Build", "the", "line"]
     ]
   },
-  "usage_notes": "Layout-aware effect: each incoming word changes the target x-position of the whole line. Best for short three-word phrases; implementation requires measuring word widths and animating existing words to new positions. A small entry and reflow blur helps the push feel smoother without extending the timing.",
-  "preview": "./previews/kinetic-center-build.html"
+  "usage_notes": "Layout-aware effect: each incoming word changes the target x-position of the whole line. Best for short three-word phrases; implementation requires measuring word widths and animating existing words to new positions. A small entry and reflow blur helps the push feel smoother without extending the timing."
 }

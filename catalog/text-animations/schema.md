@@ -1,40 +1,31 @@
 # Animate Text Spec Format
 
-Every public effect contract is a single spec JSON file.
+Every public effect ships two generated JSON contracts.
 
-The same `spec.json` serves two purposes:
+1. `assets/specs/<id>.json`: portable motion spec
+2. `assets/effects/<id>.json`: exact generated animation recipe
 
-1. portable animation contract
-2. exact site-reference contract for visible website effects
+Use the portable spec when translating the motion intent into a new context. Use the exact effect recipe when reproducing generated animation behavior 1:1 in WAAPI, Motion, GSAP, or another target library.
 
-There is no separate public `effect.json` or example-component layer. If an agent needs exact website parity, it should read the spec's generated `site_reference` block.
+Content does not belong in the portable spec. Sample text stays in `assets/samples.json` and is embedded into generated effect recipes.
 
-Portable motion fields live at the top level.
+## Portable Spec Top-level Fields
 
-When a spec appears on the current website showcase, it also carries a `site_reference` block that documents the additional renderer, playback, runtime, and stage adjustments needed to match the site version exactly.
-
-Content does not belong in the spec. Sample text stays in `assets/samples.json`.
-
-## Top-level fields
-
-| Field              | Type           | Description                                                                         |
-| ------------------ | -------------- | ----------------------------------------------------------------------------------- |
-| `id`               | string         | Kebab-case identifier, matches filename.                                            |
-| `display_name`     | string         | Human-readable name.                                                                |
-| `description`      | string         | One-sentence description of the effect.                                             |
-| `inspiration`      | string         | Freeform design inspiration.                                                        |
-| `target`           | enum           | `whole`, `per-character`, `per-word`, or `per-line`.                                |
-| `signature_easing` | string         | Dominant easing curve for quick identification.                                     |
-| `enter`            | object         | Portable entrance phase.                                                            |
-| `exit`             | object         | Portable exit phase.                                                                |
-| `swap`             | object?        | Portable text-replacement choreography.                                             |
-| `usage_notes`      | string         | Usage guidance and caveats.                                                         |
-| `preview`          | string         | Relative preview path.                                                              |
-| `stagger_mode`     | enum?          | Optional stagger order override.                                                    |
-| `custom_renderer`  | enum?          | Optional portable renderer family hint.                                             |
-| `build`            | object?        | Optional renderer-aware structured parameters.                                      |
-| `visibility`       | enum?          | Generated field: `visible` or `hidden` on the current website.                      |
-| `site_reference`   | object or null | Generated field for exact site reproduction. Hidden effects may set this to `null`. |
+| Field              | Type    | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| `id`               | string  | Kebab-case identifier, matches filename.             |
+| `display_name`     | string  | Human-readable name.                                 |
+| `description`      | string  | One-sentence description of the effect.              |
+| `inspiration`      | string  | Freeform design inspiration.                         |
+| `target`           | enum    | `whole`, `per-character`, `per-word`, or `per-line`. |
+| `signature_easing` | string  | Dominant easing curve for quick identification.      |
+| `enter`            | object  | Portable entrance phase.                             |
+| `exit`             | object  | Portable exit phase.                                 |
+| `swap`             | object? | Portable text-replacement choreography.              |
+| `usage_notes`      | string  | Usage guidance and caveats.                          |
+| `stagger_mode`     | enum?   | Optional stagger order override.                     |
+| `custom_renderer`  | enum?   | Optional portable renderer family hint.              |
+| `build`            | object? | Optional renderer-aware structured parameters.       |
 
 ## `enter` / `exit`
 
@@ -105,8 +96,8 @@ Fields:
 Important:
 
 - `swap` describes the portable motion contract.
-- `site_reference.playback` describes the current website implementation.
-- For exact site parity, follow `site_reference.playback` when it adds or overrides loop behavior.
+- `assets/effects/<id>.json` describes the generated implementation recipe.
+- For exact site parity, follow `effect.showcase.playback` when it adds or overrides loop behavior.
 
 ## `stagger_mode`
 
@@ -125,7 +116,7 @@ Supported values:
 - `kinetic-top-build`
 - `shared-slide-opacity-stage`
 
-This field is a portable renderer hint. The resolved current website renderer is described in `site_reference.renderer`.
+This field is a portable renderer hint. The resolved generated renderer is described in `effect.showcase.renderer`.
 
 ## `build`
 
@@ -157,62 +148,87 @@ Known keys:
 - `word_opacity_from`
 - `word_opacity_to`
 
-## `site_reference`
+## Exact Effect Recipe
 
-`site_reference` is generated metadata for reproducing the current website version exactly.
-
-It does not carry content. Instead it points to the sample asset entry for the effect.
+`assets/effects/<id>.json` is generated metadata for reproducing the current animation behavior exactly. It intentionally excludes non-animation presentation styling such as font size, font weight, color, padding, card chrome, and page layout.
 
 ```json
 {
-  "sample_source": {
-    "asset": "assets/samples.json",
-    "key": "soft-blur-in"
-  },
-  "renderer": {
-    "id": "generic-stagger",
-    "source": "default",
-    "params": {}
-  },
-  "runtime": {
-    "preset": "website-default",
-    "speed_multiplier": 0.72,
-    "hold_ms": 550,
-    "gap_ms": 320,
-    "y_travel_multiplier": 0.58,
-    "initial_delay_ms": {
-      "mode": "random-range",
-      "min": 0,
-      "max": 400
-    }
-  },
-  "playback": {
-    "kind": "loop",
-    "cycle": ["enter", "hold", "exit", "micro-delay", "gap"],
-    "replacement_behavior": "exit-before-enter",
-    "hold_ms": 550,
-    "micro_delay_ms": 35,
-    "gap_ms": 320
-  },
-  "stage": {
-    "preset": "default-title-card"
-  },
-  "reproduction_notes": ["Paragraph 1", "Paragraph 2"]
+  "id": "soft-blur-in",
+  "visibility": "visible",
+  "portable_spec": {},
+  "showcase": {
+    "content": {
+      "sample": "Motion with intent.",
+      "samples": ["Motion with intent.", "Think different.", "Built to flow."]
+    },
+    "content_usage": {
+      "default_policy": "When applying an effect to an existing heading or text section, preserve the section text.",
+      "showcase_samples": "showcase.content.sample and samples are reference/demo copy.",
+      "loop_policy": "If the existing section supplies multiple phrases, loop those phrases."
+    },
+    "sample_source": {
+      "asset": "assets/samples.json",
+      "key": "soft-blur-in"
+    },
+    "renderer": {
+      "id": "generic-stagger",
+      "source": "default",
+      "params": {},
+      "recipe": {}
+    },
+    "runtime": {
+      "preset": "website-default",
+      "speed_multiplier": 0.72,
+      "hold_ms": 550,
+      "gap_ms": 320,
+      "y_travel_multiplier": 0.58,
+      "initial_delay_ms": {
+        "mode": "random-range",
+        "min": 0,
+        "max": 400
+      }
+    },
+    "playback": {
+      "kind": "loop",
+      "cycle": ["enter", "hold", "exit", "micro-delay", "gap"],
+      "replacement_behavior": "exit-before-enter",
+      "hold_ms": 550,
+      "micro_delay_ms": 35,
+      "gap_ms": 320
+    },
+    "timing": {},
+    "stage": {
+      "preset": "default-text-host"
+    },
+    "rendering_contract": {},
+    "library_selection": {},
+    "library_adapters": {},
+    "engine_notes": [],
+    "reproduction_notes": []
+  }
 }
 ```
 
-### `site_reference.sample_source`
+Hidden effects set `"showcase": null`.
 
-Points to the sample content needed to mirror the current website demo.
+### `effect.showcase.content`
+
+The exact text samples or phrase arrays used by the generated examples.
+
+### `effect.showcase.content_usage`
+
+Rules for applying an animation recipe to real application text.
 
 Fields:
 
-- `asset`
-- `key`
+- `default_policy`: preserve existing heading or section text when the user asks to apply an effect.
+- `showcase_samples`: use bundled samples as demo/fallback copy, not as replacement product copy.
+- `loop_policy`: use user/application-provided phrase arrays when available; otherwise animate the existing phrase or explicitly provided alternates.
 
-### `site_reference.renderer`
+### `effect.showcase.renderer`
 
-Resolved website renderer for the current effect.
+Resolved renderer for the current effect.
 
 Fields:
 
@@ -226,11 +242,17 @@ Fields:
   - `spec`
   - `catalog-override`
 - `params`
-  - structured renderer-specific data used by the current website version
+  - structured renderer-specific data used by the generated recipe
+- `recipe`
+  - the renderer algorithm needed for exact reproduction
+  - may include `initial_state`, `verification`, `canonical_loop_pseudocode`, and `keyframe_recipe` for renderers where prose is not precise enough
+  - `initial_state` defines required pre-animation styles such as word opacity before a reveal
+  - `canonical_loop_pseudocode` defines the low-freedom loop order when prose could lead to double-enter or enter-only implementations
+  - `keyframe_recipe` defines intermediate offsets and formulas that must be preserved for layout-aware renderers
 
-### `site_reference.runtime`
+### `effect.showcase.runtime`
 
-Resolved runtime transforms applied by the current website loop.
+Resolved runtime transforms applied by the generated loop.
 
 Fields:
 
@@ -241,9 +263,9 @@ Fields:
 - `y_travel_multiplier`
 - `initial_delay_ms`
 
-### `site_reference.playback`
+### `effect.showcase.playback`
 
-Explicit current website playback behavior.
+Explicit generated playback behavior.
 
 Fields:
 
@@ -260,9 +282,27 @@ Typical `cycle` values:
 - `["enter", "hold", "exit", "gap"]`
 - `["build-phrase", "hold", "exit-phrase", "gap"]`
 
-### `site_reference.stage`
+### `effect.showcase.timing`
 
-Resolved website stage treatment for the effect.
+Pre-scaled timing values for exact animation reproduction.
+
+Generic stagger effects include:
+
+- `enter.source_duration_ms`
+- `enter.source_stagger_ms`
+- `enter.scaled_duration_ms`
+- `enter.scaled_stagger_ms`
+- `exit.source_duration_ms`
+- `exit.source_stagger_ms`
+- `exit.scaled_duration_ms`
+- `exit.scaled_stagger_ms`
+- formulas for total phase duration based on animated unit count
+
+Layout-aware renderers include renderer-specific timing blocks such as `first_word`, `push`, `exit`, `hold_ms`, and `gap_ms`.
+
+### `effect.showcase.stage`
+
+Resolved animation host requirements for the effect. These fields describe what the animation engine needs, not the visual design of the page.
 
 Fields vary by preset, but may include:
 
@@ -272,8 +312,82 @@ Fields vary by preset, but may include:
 - `kinetic_container`
 - `kinetic_word`
 
-### `site_reference.reproduction_notes`
+Do not treat this block as a style guide. Typography, colors, card size, padding, and surrounding layout belong to the consuming application unless a user explicitly asks to reproduce a specific page design.
 
-Array of short paragraphs describing the additional site-specific transformations that an implementation should preserve to match the website visually.
+### `effect.showcase.rendering_contract`
 
-This field is the main prose guidance for agents reproducing the site version in another stack.
+Structured details that affect exact reproduction, including:
+
+- target split
+- stagger mode
+- y-travel multiplier
+- transform order
+- fill behavior
+- initial delay policy
+- content replacement behavior
+
+For kinetic build renderers, `y_travel_multiplier` is intentionally `1` and the contract includes a note that build x/y values are raw renderer pixels. Runtime y-travel scaling only applies to generic/title frame conversion, not to `buildKineticFrame` coordinates.
+
+### `effect.showcase.library_selection`
+
+Adapter-selection rules for target library requests.
+
+Fields:
+
+- `supported_adapters`: supported adapter ids, currently `waapi`, `motion`, and `gsap`.
+- `aliases`: common user-facing library names mapped to adapter ids.
+- `rule`: required behavior when a user names a target animation library.
+- `verification`: import/call checks an agent should run against generated code.
+
+If a user explicitly asks for GSAP, the implementation should use `showcase.library_adapters.gsap`; if they ask for Motion, use `showcase.library_adapters.motion`; if they ask for WAAPI, use `showcase.library_adapters.waapi`. Do not silently substitute one adapter for another.
+
+### `effect.showcase.library_adapters`
+
+Target-library mapping rules for exact implementation.
+
+Built-in adapter keys:
+
+- `waapi`
+- `motion`
+- `gsap`
+
+Each adapter includes:
+
+- `target_library`
+- `install`
+- `import_statement`
+- `time_unit`
+- `start_animation`
+- `keyframe_shape`
+- `easing`
+- `verification`
+- `completion`
+- `cancellation`
+- `renderer_notes`
+
+Use the adapter matching the requested stack. For example, Motion implementations should use `showcase.library_adapters.motion` for time-unit conversion, easing helper conversion, property-keyframe shape, and renderer-specific notes. GSAP implementations should use `showcase.library_adapters.gsap` for `CustomEase`, `gsap.set`, `gsap.to`, keyframe offsets, and completion behavior.
+
+For Motion, `times` belongs in the animation options object, not inside the property keyframes object. For GSAP, first-frame styles should be initialized before tweens start, and offset-derived per-keyframe segment durations should not be combined with a top-level `duration` on the same `gsap.to` call.
+
+Exact implementations must preserve the full playback loop for the selected renderer. A first-enter-only Motion, GSAP, WAAPI, or CSS reveal is not equivalent to the generated site behavior unless the user explicitly asks for a one-shot reveal.
+
+For generic stagger loops, the first phrase enters once. After that, each loop exits the currently visible phrase, waits the configured micro-delay, replaces the stage with the next phrase, enters that next phrase, waits the gap, and then starts the next cycle by exiting the visible phrase. Do not enter the same visible phrase twice after the gap.
+
+### `effect.showcase.engine_notes`
+
+Stack-specific implementation notes for WAAPI, Motion, GSAP, and sometimes CSS.
+
+### `effect.showcase.reproduction_notes`
+
+Short paragraphs describing additional animation-specific transformations that an implementation should preserve for visual parity.
+
+## Generated Shared Assets
+
+The public skill also includes:
+
+- `assets/runtime-presets.json`
+- `assets/stage-presets.json`
+- `assets/renderer-recipes.json`
+- `assets/library-adapters.json`
+
+These are shared references. `assets/effects/<id>.json` embeds the resolved values needed for one effect so agents can usually use `get-effect.mjs <id>` as the one-stop exact reproduction artifact.

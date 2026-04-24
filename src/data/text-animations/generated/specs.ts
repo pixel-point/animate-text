@@ -65,7 +65,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       "Works best on hero titles 48px+ against solid backgrounds. On body text (<24px), reduce blur_px to 6 and stagger_ms to 15. Avoid on very long strings (>40 chars) — total stagger becomes too long; in that case switch target to 'per-word'.",
-    preview: './previews/soft-blur-in.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -98,31 +97,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -184,7 +187,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       "Works on 40px+ headlines. Zero blur keeps it sharp — that's the key distinction from soft-blur-in. Stagger 24ms gives it quicker momentum; don't go below 16ms or it flattens.",
-    preview: './previews/per-character-rise.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -217,31 +219,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -305,7 +311,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Best for medium phrases and headings; for long copy prefer per-word only up to 16–18 words to keep total stagger time readable. micro_delay_ms helps prevent old/new words from visibly stacking during swaps.',
-    preview: './previews/per-word-crossfade.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -338,31 +343,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -408,7 +417,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'The overshoot comes from cubic-bezier y2 > 1 (1.56). Per-word is the sweet spot - per-character at this easing feels too bouncy. Stagger is intentionally high here to create a visible staircase effect. This variant uses no overlap on swap to avoid content crossing during transitions.',
-    preview: './previews/spring-scale-in.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -441,31 +449,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -512,7 +524,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 35,
     },
     usage_notes: 'Best for two-line and three-line headings where line order should stay readable.',
-    preview: './previews/mask-reveal-up.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -545,31 +556,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -614,7 +629,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Great for 2-line or 3-line headings. This variant keeps swap non-overlapping to avoid content intersections. Reduce x-distance for narrow layouts to keep motion tight on mobile.',
-    preview: './previews/line-by-line-slide.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -647,31 +661,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -714,7 +732,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 85,
     },
     usage_notes: 'Good for short copy. Keep line length moderate so stepping stays intentional.',
-    preview: './previews/typewriter.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -747,31 +764,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -816,7 +837,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Use this for single words or short titles. This variant keeps swap non-overlapping to avoid content intersections. For paragraphs, switch target to per-word to avoid perceivable lag.',
-    preview: './previews/micro-scale-fade.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -849,31 +869,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -922,7 +946,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Use as a premium micro-transition for title swaps and copy refreshes. This variant avoids overlap between outgoing and incoming text.',
-    preview: './previews/shimmer-sweep.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -955,31 +978,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1031,7 +1058,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 60,
     },
     usage_notes: 'Best for replacing content in the same layout slot without directional meaning.',
-    preview: './previews/fade-through.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1064,31 +1090,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1136,7 +1166,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Use for bold word-by-word hard cuts. No overlap keeps phrase swaps visually clean.',
-    preview: './previews/shared-axis-y.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1169,31 +1198,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1240,7 +1273,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 20,
     },
     usage_notes: 'Use for emphasizing focus transitions where scale communicates depth.',
-    preview: './previews/shared-axis-z.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1273,31 +1305,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1344,7 +1380,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 35,
     },
     usage_notes: 'Works best on short phrases; avoid very long lines to keep swap time tight.',
-    preview: './previews/blur-out-up.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1377,31 +1412,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1448,7 +1487,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 20,
     },
     usage_notes: 'Safe default for product UIs where copy should feel polished but not animated.',
-    preview: './previews/scale-down-fade.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1481,31 +1519,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1556,7 +1598,6 @@ export const TEXT_ANIMATION_SPECS = {
       micro_delay_ms: 35,
     },
     usage_notes: 'Best on large headlines where blur distance reads as intentional and premium.',
-    preview: './previews/focus-blur-resolve.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1589,31 +1630,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1677,7 +1722,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Best for short single words, labels, or compact headline swaps at 40px+. This version is intentionally more staged than per-character-rise: very large per-symbol delay, fewer simultaneous letters on screen, and a taller lift from below.',
-    preview: './previews/bottom-up-letters.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1710,31 +1754,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1798,7 +1846,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Best for short single words, labels, or compact headline swaps at 40px+. This is the top-down counterpart to bottom-up-letters: very large per-symbol delay, fewer simultaneous letters on screen, and a tall drop from above.',
-    preview: './previews/top-down-letters.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1831,31 +1878,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect uses the generic stagger renderer. Apply the portable enter and exit frames per animated unit, preserving the declared target split and stagger ordering.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -1945,7 +1996,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Layout-aware effect: each incoming word changes the target x-position of the whole line. Best for short three-word phrases; implementation requires measuring word widths and animating existing words to new positions. A small entry and reflow blur helps the push feel smoother without extending the timing.',
-    preview: './previews/kinetic-center-build.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -1998,26 +2048,50 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 158,
       },
       stage: {
-        preset: 'kinetic-line-card',
-        base_preset: 'default-title-card',
+        preset: 'kinetic-line-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
+        container: {
+          requirement: 'Provide a host element for the animated title.',
+          perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
+        },
+        title: {
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
+        },
+        unit: {
+          backface_visibility: 'hidden',
+          display: 'inline-block',
+          line_display: 'block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
+        },
         kinetic_container: {
-          width: 'min(92%, 270px)',
-          height_px: 72,
+          requirement:
+            'Use a relative-positioned inline host large enough for the phrase; exact dimensions belong to the consuming UI.',
           position: 'relative',
+          coordinate_origin: 'center',
         },
         kinetic_word: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.02,
-          line_height: 1.1,
+          backface_visibility: 'hidden',
+          left: '50%',
+          position: 'absolute',
+          top: '50%',
           white_space: 'nowrap',
           absolute_centered: true,
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect is layout-aware. Measure word widths, compute centered x positions for the whole phrase, and animate existing words to their next positions while the incoming word enters from the right.',
-        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For site parity, scale duration and stagger timing by 0.72. Keep kinetic build x/y params as raw renderer pixel coordinates; runtime.y_travel_multiplier applies to generic/title frame conversion, not to buildKineticFrame coordinates.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -2091,7 +2165,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Best on three-word headings where word order matters. Keep the horizontal travel compact and shared; the phrase should read as one move, with staging communicated only by opacity. For longer phrases, reduce stagger_ms or shorten the opacity duration so the cascade does not drag.',
-    preview: './previews/short-slide-right.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -2128,31 +2201,35 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 320,
       },
       stage: {
-        preset: 'default-title-card',
+        preset: 'default-text-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
         container: {
-          container_type: 'inline-size',
-          padding: 'clamp(1rem, 5cqi, 1.5rem)',
+          requirement: 'Provide a host element for the animated title.',
           perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
         },
         title: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.022,
-          line_height: 1.08,
-          max_width: 'min(92%, 18ch)',
-          text_align: 'center',
-          text_wrap: 'balance',
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
         },
         unit: {
+          backface_visibility: 'hidden',
           display: 'inline-block',
+          line_display: 'block',
           transform_origin: '50% 55%',
           white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect moves the full phrase as one shared horizontal transform. Preserve a single phrase-level translation and reveal word order only through opacity timing.',
         'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },
@@ -2241,7 +2318,6 @@ export const TEXT_ANIMATION_SPECS = {
     },
     usage_notes:
       'Best on short three-word headings where each word can live on its own line. Keep the vertical drop compact so the motion still feels editorial, and let the stacking displacement carry most of the energy. For longer phrases, reduce entry_offset_y_px or switch to a softer shared-slide pattern.',
-    preview: './previews/short-slide-down.html',
     visibility: 'visible',
     site_reference: {
       sample_source: {
@@ -2290,26 +2366,50 @@ export const TEXT_ANIMATION_SPECS = {
         gap_ms: 130,
       },
       stage: {
-        preset: 'kinetic-stack-card',
-        base_preset: 'default-title-card',
+        preset: 'kinetic-stack-host',
+        purpose:
+          'Animation-only host requirements. Typography, color, card chrome, padding, and responsive sizing are intentionally excluded so the skill stays portable.',
+        container: {
+          requirement: 'Provide a host element for the animated title.',
+          perspective_px: 900,
+          perspective_note:
+            'Needed when effects use z_px, rotate_x_deg, or rotate_y_deg. Host layout and size are application-owned.',
+        },
+        title: {
+          requirement: 'Animate the phrase container when the renderer recipe uses title frames.',
+          display: 'inline-block',
+          transform_style: 'preserve-3d',
+          layout_note:
+            'Do not force flex-direction: column on the title globally; line breaks come from span.text-animation-unit.line using display:block.',
+        },
+        unit: {
+          backface_visibility: 'hidden',
+          display: 'inline-block',
+          line_display: 'block',
+          transform_origin: '50% 55%',
+          white_space: 'pre',
+          will_change: ['transform', 'opacity', 'filter'],
+        },
         kinetic_container: {
-          width: 'min(92%, 270px)',
-          height_px: 132,
+          requirement:
+            'Use a relative-positioned block host large enough for the stack; exact dimensions belong to the consuming UI.',
           position: 'relative',
+          coordinate_origin: 'center',
         },
         kinetic_word: {
-          font_size: 'clamp(1.375rem, 10cqi, 2.125rem)',
-          font_weight: 580,
-          letter_spacing_em: -0.02,
-          line_height: 1.1,
+          backface_visibility: 'hidden',
+          left: '50%',
+          position: 'absolute',
+          top: '50%',
           white_space: 'nowrap',
           absolute_centered: true,
+          will_change: ['transform', 'opacity', 'filter'],
         },
       },
       reproduction_notes: [
         'On the site this effect builds a centered vertical stack. Measure line heights, compute centered y positions for the stack, and animate existing words upward as the incoming word drops into the next line.',
-        'For site parity, scale duration and stagger timing by 0.72 and scale vertical travel by 0.58. These runtime transforms materially affect the perceived pace and distance.',
-        'For exact site reproduction, follow `site_reference.playback` and `site_reference.stage` over any abstract assumptions inferred from the portable contract alone. The current site loop and typography treatment are part of the visible result.',
+        'For site parity, scale duration and stagger timing by 0.72. Keep kinetic build x/y params as raw renderer pixel coordinates; runtime.y_travel_multiplier applies to generic/title frame conversion, not to buildKineticFrame coordinates.',
+        'For exact animation reproduction, follow `showcase.playback`, `showcase.timing`, `showcase.rendering_contract`, and `showcase.stage` over assumptions inferred from the portable contract alone. Presentation styling such as font size, font weight, color, padding, and card chrome is intentionally application-owned.',
       ],
     },
   },

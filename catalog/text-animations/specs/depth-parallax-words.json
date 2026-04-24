@@ -9,17 +9,40 @@
     "duration_ms": 700,
     "stagger_ms": 70,
     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
-    "from": { "opacity": 0, "y_px": 18, "scale": 0.92, "blur_px": 3 },
-    "to": { "opacity": 1, "y_px": 0, "scale": 1, "blur_px": 0 }
+    "from": {
+      "opacity": 0,
+      "y_px": 18,
+      "scale": 0.92,
+      "blur_px": 3
+    },
+    "to": {
+      "opacity": 1,
+      "y_px": 0,
+      "scale": 1,
+      "blur_px": 0
+    }
   },
   "exit": {
     "duration_ms": 500,
     "stagger_ms": 45,
     "easing": "cubic-bezier(0.64, 0, 0.78, 0)",
-    "from": { "opacity": 1, "y_px": 0, "scale": 1, "blur_px": 0 },
-    "to": { "opacity": 0, "y_px": -10, "scale": 1.05, "blur_px": 2 }
+    "from": {
+      "opacity": 1,
+      "y_px": 0,
+      "scale": 1,
+      "blur_px": 0
+    },
+    "to": {
+      "opacity": 0,
+      "y_px": -10,
+      "scale": 1.05,
+      "blur_px": 2
+    }
   },
-  "swap": { "mode": "crossfade", "overlap_ms": 180, "micro_delay_ms": 30 },
-  "usage_notes": "Use short copy blocks and moderate stagger to avoid visual overload.",
-  "preview": "./previews/depth-parallax-words.html"
+  "swap": {
+    "mode": "crossfade",
+    "overlap_ms": 180,
+    "micro_delay_ms": 30
+  },
+  "usage_notes": "Use short copy blocks and moderate stagger to avoid visual overload."
 }

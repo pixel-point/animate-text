@@ -14,7 +14,11 @@ function scoreSpec(spec, query, terms) {
   const inspiration = spec.inspiration.toLowerCase();
   const usageNotes = spec.usage_notes.toLowerCase();
   const target = spec.target.toLowerCase();
-  const renderer = (spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? '').toLowerCase();
+  const renderer = (
+    spec.effect?.showcase?.renderer?.id ??
+    spec.custom_renderer ??
+    ''
+  ).toLowerCase();
 
   if (id === query) score += 120;
   if (displayName === query) score += 100;
@@ -51,7 +55,11 @@ const specsDir = new URL('../assets/specs/', import.meta.url);
 
 const results = readdirSync(fileURLToPath(specsDir))
   .filter((fileName) => fileName.endsWith('.json'))
-  .map((fileName) => readJson(new URL(`../assets/specs/${fileName}`, import.meta.url)))
+  .map((fileName) => {
+    const spec = readJson(new URL(`../assets/specs/${fileName}`, import.meta.url));
+    const effect = readJson(new URL(`../assets/effects/${fileName}`, import.meta.url));
+    return { ...spec, effect };
+  })
   .map((spec) => {
     return {
       spec,
@@ -87,7 +95,7 @@ const results = readdirSync(fileURLToPath(specsDir))
     display_name: spec.display_name,
     description: spec.description,
     target: spec.target,
-    renderer: spec.site_reference?.renderer?.id ?? spec.custom_renderer ?? null,
+    renderer: spec.effect?.showcase?.renderer?.id ?? spec.custom_renderer ?? null,
     visible: spec.visibility ? spec.visibility === 'visible' : visibleOrder.has(spec.id),
     score,
   }));

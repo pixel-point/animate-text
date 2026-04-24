@@ -9,17 +9,36 @@
     "duration_ms": 500,
     "stagger_ms": 0,
     "easing": "cubic-bezier(0.2, 0, 0, 1)",
-    "from": { "opacity": 0, "x_px": 24, "scale": 0.98 },
-    "to": { "opacity": 1, "x_px": 0, "scale": 1 }
+    "from": {
+      "opacity": 0,
+      "x_px": 24,
+      "scale": 0.98
+    },
+    "to": {
+      "opacity": 1,
+      "x_px": 0,
+      "scale": 1
+    }
   },
   "exit": {
     "duration_ms": 360,
     "stagger_ms": 0,
     "easing": "cubic-bezier(0.4, 0, 1, 1)",
-    "from": { "opacity": 1, "x_px": 0, "scale": 1 },
-    "to": { "opacity": 0, "x_px": -20, "scale": 0.98 }
+    "from": {
+      "opacity": 1,
+      "x_px": 0,
+      "scale": 1
+    },
+    "to": {
+      "opacity": 0,
+      "x_px": -20,
+      "scale": 0.98
+    }
   },
-  "swap": { "mode": "crossfade", "overlap_ms": 120, "micro_delay_ms": 20 },
-  "usage_notes": "Use when moving between same-level views where horizontal direction conveys progress.",
-  "preview": "./previews/shared-axis-x.html"
+  "swap": {
+    "mode": "crossfade",
+    "overlap_ms": 120,
+    "micro_delay_ms": 20
+  },
+  "usage_notes": "Use when moving between same-level views where horizontal direction conveys progress."
 }
