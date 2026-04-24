@@ -1,4 +1,3 @@
-const { getPropertiesAtLength } = require('svg-path-properties');
 const { svgPathProperties } = require('svg-path-properties');
 
 const path =
@@ -19,7 +18,7 @@ for (let i = 0; i <= 1000; i++) {
   }
 }
 
-console.log('Closest percentage:', closestPct);
-console.log('Distance:', minDistance);
+console.info('Closest percentage:', closestPct);
+console.info('Distance:', minDistance);
 const p = properties.getPointAtLength(length * closestPct);
-console.log('Point:', p.x, p.y);
+console.info('Point:', p.x, p.y);
