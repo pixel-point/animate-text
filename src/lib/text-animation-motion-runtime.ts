@@ -1,3 +1,5 @@
+import { animate, cubicBezier, steps } from 'motion/react';
+
 import { TEXT_ANIMATION_RUNTIME } from '@/data/text-animations/generated/catalog';
 import type {
   TextAnimationCatalogItem,
@@ -17,12 +19,61 @@ import {
   toAnimationFrame,
 } from '@/lib/text-animation-shared';
 
+type MotionPlaybackControls = ReturnType<typeof animate>;
+
 type LoopController = {
-  animations: Set<Animation>;
+  animations: Set<MotionPlaybackControls>;
   cancelled: boolean;
   stage: HTMLElement;
   timers: Set<number>;
 };
+
+type MotionFrameValue = number | string;
+
+type MotionAnimationOptions = {
+  delay?: number;
+  duration: number;
+  easing: string;
+};
+
+function resolveMotionEasing(easing: string) {
+  const normalized = easing.trim();
+  const bezierMatch = normalized.match(/^cubic-bezier\(([^)]+)\)$/i);
+
+  if (bezierMatch) {
+    const values = bezierMatch[1]
+      .split(',')
+      .map((value) => Number.parseFloat(value.trim()))
+      .filter((value) => Number.isFinite(value));
+
+    if (values.length === 4) {
+      return cubicBezier(values[0], values[1], values[2], values[3]);
+    }
+  }
+
+  const stepsMatch = normalized.match(/^steps\(\s*(\d+)\s*,\s*(start|end)\s*\)$/i);
+
+  if (stepsMatch) {
+    return steps(
+      Number.parseInt(stepsMatch[1], 10),
+      stepsMatch[2].toLowerCase() as 'start' | 'end',
+    );
+  }
+
+  if (normalized === 'ease-in') {
+    return 'easeIn';
+  }
+
+  if (normalized === 'ease-out') {
+    return 'easeOut';
+  }
+
+  if (normalized === 'ease-in-out') {
+    return 'easeInOut';
+  }
+
+  return normalized;
+}
 
 function createLoopController(stage: HTMLElement): LoopController {
   return {
@@ -43,17 +94,25 @@ function cleanupLoop(controller: LoopController) {
   controller.timers.clear();
 
   controller.animations.forEach((animation) => {
-    animation.cancel();
+    try {
+      animation.stop?.();
+      animation.cancel?.();
+    } catch {
+      // A failed Motion start can leave a playback control that throws during cleanup.
+    }
   });
 
   controller.animations.clear();
   clearStage(controller.stage);
 }
 
-function registerAnimation(controller: LoopController, animation: Animation): Animation {
+function registerAnimation(
+  controller: LoopController,
+  animation: MotionPlaybackControls,
+): MotionPlaybackControls {
   controller.animations.add(animation);
 
-  void animation.finished.finally(() => {
+  void Promise.resolve(animation).finally(() => {
     controller.animations.delete(animation);
   });
 
@@ -86,14 +145,101 @@ function sleep(controller: LoopController, delay: number): Promise<void> {
   });
 }
 
-function waitForAnimations(animations: Animation[]) {
-  return Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+function waitForAnimations(animations: MotionPlaybackControls[]) {
+  return Promise.all(
+    animations.map((animation) => Promise.resolve(animation).catch(() => undefined)),
+  );
 }
 
 function clearStage(stage: HTMLElement) {
   while (stage.firstChild) {
     stage.removeChild(stage.firstChild);
   }
+}
+
+function getFrameValue(frame: Keyframe, key: string): MotionFrameValue | undefined {
+  const value = (frame as Record<string, unknown>)[key];
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    return value;
+  }
+
+  return undefined;
+}
+
+function createMotionKeyframes(frames: Keyframe[]) {
+  const keys = new Set<string>();
+
+  frames.forEach((frame) => {
+    Object.entries(frame as Record<string, unknown>).forEach(([key, value]) => {
+      if (key !== 'offset' && (typeof value === 'number' || typeof value === 'string')) {
+        keys.add(key);
+      }
+    });
+  });
+
+  const keyframes: Record<string, MotionFrameValue[]> = {};
+
+  keys.forEach((key) => {
+    const fallback = frames
+      .map((frame) => getFrameValue(frame, key))
+      .find((value): value is MotionFrameValue => value !== undefined);
+
+    if (fallback === undefined) {
+      return;
+    }
+
+    let currentValue = fallback;
+    keyframes[key] = frames.map((frame) => {
+      const nextValue = getFrameValue(frame, key);
+
+      if (nextValue !== undefined) {
+        currentValue = nextValue;
+      }
+
+      return currentValue;
+    });
+  });
+
+  const hasExplicitOffsets = frames.some((frame) => typeof frame.offset === 'number');
+  const times = hasExplicitOffsets
+    ? frames.map((frame, index) => {
+        if (typeof frame.offset === 'number') {
+          return frame.offset;
+        }
+
+        if (index === 0) {
+          return 0;
+        }
+
+        if (index === frames.length - 1) {
+          return 1;
+        }
+
+        return index / (frames.length - 1);
+      })
+    : undefined;
+
+  return { keyframes, times };
+}
+
+function startAnimation(
+  controller: LoopController,
+  element: Element,
+  frames: Keyframe[],
+  { delay = 0, duration, easing }: MotionAnimationOptions,
+) {
+  const { keyframes, times } = createMotionKeyframes(frames);
+
+  return registerAnimation(
+    controller,
+    animate(element, keyframes, {
+      delay: delay / 1000,
+      duration: duration / 1000,
+      ease: resolveMotionEasing(easing),
+      times,
+    } as never),
+  );
 }
 
 function applyPhaseStart(
@@ -155,15 +301,11 @@ function animatePhase(
       spec.target ?? 'per-character',
     );
 
-    registerAnimation(
-      controller,
-      unit.animate([fromKeyframe, toKeyframe], {
-        delay: ranks[index] * delayStep,
-        duration,
-        easing: currentPhase.easing,
-        fill: 'forwards',
-      }),
-    );
+    startAnimation(controller, unit, [fromKeyframe, toKeyframe], {
+      delay: ranks[index] * delayStep,
+      duration,
+      easing: currentPhase.easing,
+    });
   });
 
   return duration + Math.max(0, units.length - 1) * delayStep;
@@ -270,23 +412,20 @@ async function runSharedSlideOpacityLoop(
     stage.appendChild(title);
 
     const animations = [
-      registerAnimation(
-        controller,
-        title.animate([fromFrame, toFrame], {
-          duration: titleDuration,
-          easing: enter.easing,
-          fill: 'forwards',
-        }),
-      ),
+      startAnimation(controller, title, [fromFrame, toFrame], {
+        duration: titleDuration,
+        easing: enter.easing,
+      }),
       ...units.map((unit, index) =>
-        registerAnimation(
+        startAnimation(
           controller,
-          unit.animate([{ opacity: wordOpacityFrom }, { opacity: wordOpacityTo }], {
+          unit,
+          [{ opacity: wordOpacityFrom }, { opacity: wordOpacityTo }],
+          {
             delay: index * wordStaggerMs,
             duration: wordOpacityDuration,
             easing: enter.easing,
-            fill: 'forwards',
-          }),
+          },
         ),
       ),
     ];
@@ -312,14 +451,10 @@ async function runSharedSlideOpacityLoop(
     Object.assign(title.style, fromFrame);
 
     await waitForAnimations([
-      registerAnimation(
-        controller,
-        title.animate([fromFrame, toFrame], {
-          duration: exitDuration,
-          easing: exit.easing,
-          fill: 'forwards',
-        }),
-      ),
+      startAnimation(controller, title, [fromFrame, toFrame], {
+        duration: exitDuration,
+        easing: exit.easing,
+      }),
     ]);
 
     clearStage(stage);
@@ -416,29 +551,27 @@ async function runKineticCenterBuildLoop(
 
       const widths = Array.from(line.children, (node) => (node as HTMLElement).offsetWidth);
       const nextPositions = computePositions(widths);
-      const animations: Animation[] = [];
+      const animations: MotionPlaybackControls[] = [];
 
       if (index === 0) {
         const startFrame = buildKineticFrame(0, firstWordLiftPx, entryScale, entryBlurPx, 0);
         setKineticPose(word, startFrame);
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                startFrame,
-                {
-                  ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
-                  offset: 0.58,
-                },
-                buildKineticFrame(0, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              startFrame,
               {
-                duration: firstWordDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
+                offset: 0.58,
               },
-            ),
+              buildKineticFrame(0, 0, 1, 0, 1),
+            ],
+            {
+              duration: firstWordDuration,
+              easing,
+            },
           ),
         );
       } else {
@@ -447,23 +580,21 @@ async function runKineticCenterBuildLoop(
           const nextX = nextPositions[wordIndex];
 
           animations.push(
-            registerAnimation(
+            startAnimation(
               controller,
-              currentWord.animate(
-                [
-                  buildKineticFrame(currentX, 0, 1, 0, 1),
-                  {
-                    ...buildKineticFrame(mix(currentX, nextX, 0.58), 0, 1, reflowBlurPx, 1),
-                    offset: 0.52,
-                  },
-                  buildKineticFrame(nextX, 0, 1, 0, 1),
-                ],
+              currentWord,
+              [
+                buildKineticFrame(currentX, 0, 1, 0, 1),
                 {
-                  duration: pushDuration,
-                  easing,
-                  fill: 'forwards',
+                  ...buildKineticFrame(mix(currentX, nextX, 0.58), 0, 1, reflowBlurPx, 1),
+                  offset: 0.52,
                 },
-              ),
+                buildKineticFrame(nextX, 0, 1, 0, 1),
+              ],
+              {
+                duration: pushDuration,
+                easing,
+              },
             ),
           );
         });
@@ -472,29 +603,27 @@ async function runKineticCenterBuildLoop(
         const startX = targetX + entryOffsetPx;
         setKineticPose(word, buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0));
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0),
-                {
-                  ...buildKineticFrame(
-                    mix(startX, targetX, 0.72),
-                    0,
-                    0.998,
-                    entryBlurPx * 0.38,
-                    0.84,
-                  ),
-                  offset: 0.6,
-                },
-                buildKineticFrame(targetX, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              buildKineticFrame(startX, 0, entryScale, entryBlurPx, 0),
               {
-                duration: pushDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(
+                  mix(startX, targetX, 0.72),
+                  0,
+                  0.998,
+                  entryBlurPx * 0.38,
+                  0.84,
+                ),
+                offset: 0.6,
               },
-            ),
+              buildKineticFrame(targetX, 0, 1, 0, 1),
+            ],
+            {
+              duration: pushDuration,
+              easing,
+            },
           ),
         );
       }
@@ -522,23 +651,21 @@ async function runKineticCenterBuildLoop(
     const animations = words.map((word, index) => {
       const position = positions[index];
 
-      return registerAnimation(
+      return startAnimation(
         controller,
-        word.animate(
-          [
-            buildKineticFrame(position, 0, 1, 0, 1),
-            {
-              ...buildKineticFrame(position, exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
-              offset: 0.52,
-            },
-            buildKineticFrame(position, exitLiftPx, 1, exitBlurPx, 0),
-          ],
+        word,
+        [
+          buildKineticFrame(position, 0, 1, 0, 1),
           {
-            duration: exitDuration,
-            easing: exitEasing,
-            fill: 'forwards',
+            ...buildKineticFrame(position, exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
+            offset: 0.52,
           },
-        ),
+          buildKineticFrame(position, exitLiftPx, 1, exitBlurPx, 0),
+        ],
+        {
+          duration: exitDuration,
+          easing: exitEasing,
+        },
       );
     });
 
@@ -638,29 +765,27 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
 
       const heights = Array.from(line.children, (node) => (node as HTMLElement).offsetHeight);
       const nextPositions = computePositions(heights);
-      const animations: Animation[] = [];
+      const animations: MotionPlaybackControls[] = [];
 
       if (index === 0) {
         const startFrame = buildKineticFrame(0, firstWordLiftPx, entryScale, entryBlurPx, 0);
         setKineticPose(word, startFrame);
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                startFrame,
-                {
-                  ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
-                  offset: 0.58,
-                },
-                buildKineticFrame(0, 0, 1, 0, 1),
-              ],
+            word,
+            [
+              startFrame,
               {
-                duration: firstWordDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(0, firstWordLiftPx * 0.35, 0.998, entryBlurPx * 0.45, 0.78),
+                offset: 0.58,
               },
-            ),
+              buildKineticFrame(0, 0, 1, 0, 1),
+            ],
+            {
+              duration: firstWordDuration,
+              easing,
+            },
           ),
         );
       } else {
@@ -669,23 +794,21 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
           const nextY = nextPositions[wordIndex];
 
           animations.push(
-            registerAnimation(
+            startAnimation(
               controller,
-              currentWord.animate(
-                [
-                  buildKineticFrame(0, currentY, 1, 0, 1),
-                  {
-                    ...buildKineticFrame(0, mix(currentY, nextY, 0.58), 1, reflowBlurPx, 1),
-                    offset: 0.52,
-                  },
-                  buildKineticFrame(0, nextY, 1, 0, 1),
-                ],
+              currentWord,
+              [
+                buildKineticFrame(0, currentY, 1, 0, 1),
                 {
-                  duration: pushDuration,
-                  easing,
-                  fill: 'forwards',
+                  ...buildKineticFrame(0, mix(currentY, nextY, 0.58), 1, reflowBlurPx, 1),
+                  offset: 0.52,
                 },
-              ),
+                buildKineticFrame(0, nextY, 1, 0, 1),
+              ],
+              {
+                duration: pushDuration,
+                easing,
+              },
             ),
           );
         });
@@ -696,29 +819,27 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
           buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
         );
         animations.push(
-          registerAnimation(
+          startAnimation(
             controller,
-            word.animate(
-              [
-                buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
-                {
-                  ...buildKineticFrame(
-                    0,
-                    mix(targetY + entryOffsetYPx, targetY, 0.72),
-                    0.998,
-                    entryBlurPx * 0.38,
-                    0.84,
-                  ),
-                  offset: 0.6,
-                },
-                buildKineticFrame(0, targetY, 1, 0, 1),
-              ],
+            word,
+            [
+              buildKineticFrame(0, targetY + entryOffsetYPx, entryScale, entryBlurPx, 0),
               {
-                duration: pushDuration,
-                easing,
-                fill: 'forwards',
+                ...buildKineticFrame(
+                  0,
+                  mix(targetY + entryOffsetYPx, targetY, 0.72),
+                  0.998,
+                  entryBlurPx * 0.38,
+                  0.84,
+                ),
+                offset: 0.6,
               },
-            ),
+              buildKineticFrame(0, targetY, 1, 0, 1),
+            ],
+            {
+              duration: pushDuration,
+              easing,
+            },
           ),
         );
       }
@@ -746,23 +867,21 @@ async function runKineticTopBuildLoop(controller: LoopController, item: TextAnim
     const animations = words.map((word, index) => {
       const position = positions[index];
 
-      return registerAnimation(
+      return startAnimation(
         controller,
-        word.animate(
-          [
-            buildKineticFrame(0, position, 1, 0, 1),
-            {
-              ...buildKineticFrame(0, position + exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
-              offset: 0.52,
-            },
-            buildKineticFrame(0, position + exitLiftPx, 1, exitBlurPx, 0),
-          ],
+        word,
+        [
+          buildKineticFrame(0, position, 1, 0, 1),
           {
-            duration: exitDuration,
-            easing: exitEasing,
-            fill: 'forwards',
+            ...buildKineticFrame(0, position + exitLiftPx * 0.45, 1, exitBlurPx * 0.55, 0.62),
+            offset: 0.52,
           },
-        ),
+          buildKineticFrame(0, position + exitLiftPx, 1, exitBlurPx, 0),
+        ],
+        {
+          duration: exitDuration,
+          easing: exitEasing,
+        },
       );
     });
 
@@ -804,7 +923,7 @@ function resolveRenderer(
   return undefined;
 }
 
-export function startTextAnimationLoop(
+export function startTextAnimationMotionLoop(
   stage: HTMLElement,
   item: TextAnimationCatalogItem,
   onError?: (error: unknown) => void,
